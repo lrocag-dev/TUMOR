@@ -205,3 +205,31 @@ $0.001$ & $0.0230$ & \\
 \end{tabular}
 \end{center}
 y los cambios al reducir $\Delta t$ a la mitad fueron $0.0025$ y $0.0022$ (nodal) frente a $0.0148$ y $0.0148$ (Galerkin). Es decir, con esta implementación el método de Galerkin \emph{no converge} al reducir $\Delta t$ a malla fija (el resultado se desplaza $\approx0.015$ en cada reducción), mientras que el nodal sí se estabiliza. No se pudo determinar cuál de los dos se acerca más a la solución exacta del problema continuo, porque no se dispone de solución de referencia para B1. Posibles causas de la deriva del método de Galerkin, sin verificar: orden de cuadratura insuficiente para el integrando $\phi^n\circ X$ (no polinomial), y oscilaciones de la proyección $L^2$ cerca de la singularidad cónica de $\phi_0=r-r(\theta)$ en el origen, acumuladas en cada paso.
+
+\subsection{Pérdida de la simetría radial con $r_0=1$}
+
+Experimento: $A=0.5$, $G=20$, frontera inicial $r_0=1$ (solución exacta radial: $\dot R=G\,I_1(R)/I_0(R)-AGR/2$), dominio $[-4,4]^2$, método de características nodal con $\Delta t=0.002$, $t_{\max}=0.3$. Se mide la asimetría $(r_{\max}-r_{\min})/r_{\rm media}$ sobre 48 ángulos.
+
+\begin{center}
+\begin{tabular}{c|cc|cc|c}
+\toprule
+ & \multicolumn{2}{c|}{$n=60$} & \multicolumn{2}{c|}{$n=100$} & exacto\\
+$t$ & $r_{\rm media}$ & asimetría & $r_{\rm media}$ & asimetría & $R(t)$\\
+\midrule
+$0.05$ & $1.2060$ & $0.0040$ & $1.2060$ & $0.0021$ & $1.2054$\\
+$0.10$ & $1.4240$ & $0.0063$ & $1.4243$ & $0.0040$ & $1.4232$\\
+$0.20$ & $1.8527$ & $0.0192$ & $1.8583$ & $0.0101$ & $1.8580$\\
+$0.30$ & $2.2260$ & $0.0372$ & $2.2403$ & $0.0160$ & $2.2419$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+El radio medio es correcto (error $0.7\%$ con $n=60$, $0.07\%$ con $n=100$), pero la frontera se deforma de manera creciente con el tiempo: los radios en las direcciones de los ejes de la malla ($0^\circ,90^\circ,180^\circ,270^\circ$) crecen más que en las diagonales y entre ejes opuestos (p.\,ej.\ $270^\circ$ frente a $90^\circ$). La asimetría disminuye al refinar la malla ($0.037\to0.016$, razón $2.3$ para $h$ reducido en $1.67$). La malla con diagonales alternadas (\texttt{flags=1}) la reduce a $0.019$ con $n=60$, sin eliminarla.
+
+\paragraph{Aislamiento del origen} (todas con $n=60$, $t=0.3$):
+\begin{itemize}
+	\item Con la curvatura exacta $\kappa=1/r$ en lugar de $\kappa_h$: asimetría $0.034$ (frente a $0.037$). \emph{La aproximación de la curvatura no es la causa.}
+	\item Con la velocidad radial exacta $V(R(t))\,x/|x|$ en lugar de la calculada: asimetría $0.001$ y $r_{\rm media}=2.2412$. \emph{El transporte de $\phi$ conserva la simetría.}
+	\item Diagnóstico de la velocidad calculada sobre el círculo $r=R_{\rm ex}$ ($t=0.12$, $R=1.51$): $\partial_nP$, que debería ser $0$ (en el caso radial $P$ es constante), varía entre $-0.12$ y $0.18$ con un patrón de periodo $90^\circ$ ligado a la malla ($-0.092$, $0.181$, $-0.093$, $0.071$ en $0^\circ,45^\circ,90^\circ,135^\circ$). $\partial_nU$ varía entre $0.588$ y $0.603$ (exacto $0.599$; media $0.596$), y al multiplicar por $G=20$ aporta una dispersión de $0.29$ en $V_n$. La velocidad calculada $v_D$ varía entre $4.17$ y $4.49$ (exacto $4.42$).
+\end{itemize}
+La causa es entonces el error, dependiente de la orientación de la malla, en el gradiente normal de las soluciones de $P$ y $U$ obtenidas con $\phi$-FEM, y no el transporte ni la curvatura. Ese error se integra en el tiempo y produce la deformación. Posibles remedios (no probados): calcular el flujo $\partial_n u$ de manera consistente (por ejemplo con la formulación dual con variable de flujo $y=-\nabla u$ que aparece comentada en el Capítulo 3, o recuperación de gradiente), usar grado mayor en $U$ y $P$, y emplear mallas simétricas.
