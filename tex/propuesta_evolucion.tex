@@ -151,3 +151,21 @@ $0.020$ & $0.0049$ & $0.0063$ & $0.0112$\\
 \end{center}
 
 Conclusiones: (i) el sesgo de $\approx0.01$ proviene del estabilizador $\theta_h$ y no del transporte (Crank--Nicolson, SUPG, $\mathbb{P}_2$), que da errores de $0.001$--$0.005$; (ii) SUPG aporta una mejora modesta; (iii) con $\theta_h=0$ el esquema es estable incluso con $\Delta t=0.02$ en este experimento, es decir, en el experimento A (frontera suave, solo el modo $k=2$) el estabilizador \emph{no es necesario} y estos ensayos no demuestran todavía su efecto estabilizante. El error se concentra en los puntos de menor radio ($\theta=\pi/2,3\pi/2$), donde la frontera queda retrasada hasta $0.008$ respecto de la referencia. El sesgo tampoco crece linealmente con $c_\theta$ ($0.006$ con $0.25$ y $0.013$ con $2$ a $n=60$), por lo que su mecanismo no está identificado. Además, la afirmación anterior de que el término estabilizador se anula con $\Delta t\to0$ en el sentido de dar un error $O(\Delta t)$ no se observó en los datos (el error casi no cambia entre $\Delta t=0.004$ y $0.04$). Quedan por probar: (a) un caso con frontera irregular y modos altos (experimentos B1 o C), que es donde el método de características exige $\Delta t$ muy pequeño y donde el estabilizador debería ser necesario; (b) limitar el estabilizador a una banda alrededor de $\Gamma$.
+
+\paragraph{Experimento B1 (frontera irregular, modos hasta $k=6$).} Malla $60\times60$ sobre $[-6,6]^2$, $t=0.04$, referencia: características con $\Delta t=0.00025$; error máximo en la posición radial en 48 ángulos.
+
+\begin{center}
+\begin{tabular}{c|c|cccc}
+\toprule
+$\Delta t$ & Caract. & SI $c_\theta=0$ & SI $c_\theta=0.25$ & SI $c_\theta=0.5$ & SI $c_\theta=1$\\
+\midrule
+$0.002$ & $0.0018$ & $0.0113$ & $0.0134$ & $0.0169$ & $0.0201$\\
+$0.004$ & $0.0040$ & $0.0091$ & $0.0154$ & $0.0185$ & $0.0222$\\
+$0.008$ & $0.0079$ & --- & --- & --- & ---\\
+$0.010$ & --- & $0.0093$ & $0.0178$ & $0.0224$ & $0.0279$\\
+$0.020$ & --- & $0.0118$ & $0.0147$ & $0.0235$ & $0.0377$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+En este horizonte temporal corto \emph{no} se reproduce la inestabilidad: el método de características es estable y su error crece linealmente con $\Delta t$ (para $\Delta t=0.008$ es $0.008$), sin ninguna corrida con \emph{blow-up}, y es más preciso que el esquema semi-implícito para todo $\Delta t$ probado. El esquema propuesto no aporta ventaja en este ensayo. La inestabilidad que obliga a usar $\Delta t=0.00025$ en B1 (tiempo final $t=1$) debe aparecer a tiempos mayores, cuando la frontera desarrolla curvatura alta; no está probado todavía que el esquema propuesto la evite.
