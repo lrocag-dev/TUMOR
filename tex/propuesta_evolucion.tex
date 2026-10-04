@@ -1,0 +1,93 @@
+\section{Evolución semi-implícita estabilizada de la frontera libre}
+\label{sec:semiimplicito}
+
+\subsection{Diagnóstico de la restricción del paso de tiempo}
+
+El método de Características de Galerkin (\ref{eqn:nuevophih}) es incondicionalmente estable para la advección lineal $\phi_t+S\cdot\nabla\phi=0$ con $S$ dado, de modo que la restricción sobre $\Delta t$ no proviene del transporte sino del \emph{acoplamiento explícito} entre la forma de la frontera y su velocidad. En el modelo adimensional, la velocidad normal es
+\[
+V_n=-\partial_n P+G\,\partial_n U-AG\,\frac{n\cdot x}{2},\qquad \Delta P=0\ \text{en }\Omega,\qquad P|_\Gamma=\kappa-AG\,\frac{|x|^2}{4}.
+\]
+Si $\Gamma$ es una perturbación de una circunferencia de radio $R$ con modo de Fourier $k$ y amplitud $\eta$, entonces $\delta\kappa\sim k^2\eta/R^2$ y, al resolver el problema armónico para $P$, $\partial_n\delta P\sim (k/R)\,\delta\kappa$. La dinámica linealizada es
+\[
+\eta_t=-\lambda_k\,\eta,\qquad \lambda_k\sim \frac{k^3}{R^3}\quad (k\gg 1),
+\]
+es decir, el problema de frontera libre es de \emph{tercer orden} en el número de onda (tipo Hele--Shaw con tensión superficial). Con una malla de paso $h$ el modo más alto representable es $k_{\max}\sim\pi/h$, y cualquier esquema explícito en la curvatura exige
+\[
+\Delta t\lesssim \frac{2}{\lambda_{k_{\max}}}\sim C\,h^{3}.
+\]
+Esto explica la inestabilidad observada y el $\Delta t$ muy pequeño. Un segundo efecto adverso del método de características con interpolación $\mathbb{P}_1$ es la difusión numérica, de orden $h^2/\Delta t$ por unidad de tiempo, que \emph{crece} al disminuir $\Delta t$ y suaviza artificialmente la frontera.
+
+\subsection{Esquema propuesto}
+
+Se propone sustituir el paso (\ref{eqn:nuevophih}) por un esquema de elementos finitos continuos en $\Phi_h$ con tres ingredientes.
+
+\paragraph{(i) Estabilizador semi-implícito (tipo Smereka / Hou--Lowengrub--Shelley).}
+Se suma y se resta un operador implícito que reproduce el símbolo dominante $\lambda_k$ con un operador local de segundo orden con coeficiente proporcional a $1/h$. Sea $\delta\phi=\phi^{n+1}-\phi^n$. Como $|\nabla\phi^n|\approx 1$ (función distancia), el término estabilizador es $\theta_h\Delta\,\delta\phi$ con
+\begin{equation}
+	\theta_h = c_\theta\,\frac{\gamma_{ref}}{h},\qquad c_\theta\ge \frac{\pi}{2},
+	\label{eqn:thetah}
+\end{equation}
+donde $\gamma_{ref}$ es la constante que multiplica a $\kappa$ en el modelo (en las variables adimensionales $\gamma_{ref}=1$). El término se anula en el límite $\Delta t\to 0$, de modo que el esquema es consistente de orden uno en el tiempo.
+
+\paragraph{(ii) Transporte con elementos finitos continuos estabilizados.}
+En lugar de interpolar $\phi^n$ en el pie de la característica, se resuelve la forma débil con estabilización SUPG o de penalización de saltos del gradiente (CIP), sin difusión de interpolación. Como el término estabilizador $\theta_h$ ya cubre la rigidez, el transporte puede tratarse con $\theta$-esquema (Crank--Nicolson) o SSP-RK2.
+
+\paragraph{(iii) Una sola extensión escalar.}
+Como $\partial_t\phi+V_n|\nabla\phi|=0$, basta extender la velocidad normal escalar $F$ (un solo problema elíptico (\ref{eqn:problemaSh}) en lugar de dos para $S_1,S_2$) y definir $S^n=F^n\,\nabla\phi^n/|\nabla\phi^n|$.
+
+\paragraph{Problema discreto.} Dados $\phi^n$ y $S^n$ (calculados con la curvatura, $c_h$, $p_h$ y la extensión en $t_n$), encontrar $\phi^{n+1}\in\Phi_h$ tal que, para todo $v_h\in\Phi_h$,
+\begin{equation}
+	\begin{aligned}
+		\Big(\frac{\phi^{n+1}-\phi^n}{\Delta t},\,v_h+\tau_K S^n\!\cdot\!\nabla v_h\Big)_{\mathcal{O}}
+		&+\theta_h\big(\nabla(\phi^{n+1}-\phi^n),\nabla v_h\big)_{\mathcal{O}}\\
+		&+\Big(S^n\!\cdot\!\nabla\phi^{n+1/2},\,v_h+\tau_K S^n\!\cdot\!\nabla v_h\Big)_{\mathcal{O}}=0,
+	\end{aligned}
+	\label{eqn:phisemiimplicito}
+\end{equation}
+con $\phi^{n+1/2}=\tfrac12(\phi^{n}+\phi^{n+1})$ y parámetro SUPG $\tau_K=\dfrac{h_K}{2\,\|S^n\|_{\infty,K}}$ (valor estándar de SUPG; se puede ajustar experimentalmente). La matriz $\tfrac1{\Delta t}M+\tfrac12 C(S^n)+\theta_h K$ es dispersa y se ensambla una vez por paso; el costo es una resolución adicional comparable a las ya presentes (curvatura, $c_h$, $p_h$, extensión).
+
+\subsection{Estabilidad del estabilizador}
+
+Para el modo $k$ del problema linealizado, la ecuación $\eta_t=-\lambda_k\eta$ con $\lambda_k\le\gamma_{ref}\,k^3$ discretizada con el estabilizador se reduce a
+\[
+(1+\Delta t\,\theta_h k^2)(\eta^{n+1}-\eta^n)=-\Delta t\,\lambda_k\,\eta^n
+\ \Longrightarrow\
+g_k=1-\frac{\Delta t\,\lambda_k}{1+\Delta t\,\theta_h k^2}.
+\]
+Entonces $|g_k|\le 1$ equivale a $\dfrac{\Delta t\,\lambda_k}{1+\Delta t\,\theta_h k^2}\le 2$, que se cumple para todo $\Delta t>0$ siempre que $\theta_h k^2\ge \lambda_k/2$, es decir $\theta_h\ge \gamma_{ref}\,k_{\max}/2=\gamma_{ref}\pi/(2h)$, que es (\ref{eqn:thetah}). Así, la restricción $\Delta t\lesssim h^3$ desaparece y $\Delta t$ queda limitado únicamente por la precisión y por el desplazamiento de la frontera por paso ($\max|V_n|\Delta t\lesssim h$).
+
+Verificación numérica del modelo lineal (con $\gamma_{ref}=1$, $\theta_h=2/h$, $\Delta t=h$, modos $1\le k\le\pi/h$):
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+$h$ & $\Delta t_{\max}$ explícito $\approx 2/k_{\max}^3$ & $\Delta t$ semi-implícito & $\max_k|g_k|$ & razón\\
+\midrule
+$0.100$ & $6.5\times10^{-5}$ & $0.100$ & $0.967$ & $\approx 1.6\times10^{3}$\\
+$0.050$ & $8.1\times10^{-6}$ & $0.050$ & $0.983$ & $\approx 6.2\times10^{3}$\\
+$0.025$ & $1.0\times10^{-6}$ & $0.025$ & $0.992$ & $\approx 2.5\times10^{4}$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Estos números corresponden al modelo lineal de Fourier, no al código completo; la ganancia real debe confirmarse con las simulaciones del capítulo de resultados numéricos.
+
+\subsection{Algoritmo modificado}
+
+Se reemplaza el último paso del Algoritmo~\ref{eqn:algoritmo}:
+\begin{enumerate}
+	\item Calcular $\kappa_h$, $c_h$, $p_h$ y $V_n$ en $t_n$ (como en el Algoritmo~\ref{eqn:algoritmo}).
+	\item Extender $V_n$ a $F_h\in M_h$ resolviendo (\ref{eqn:problemaSh}) una sola vez y formar $S^n=F_h\,\nabla\phi_h^n/|\nabla\phi_h^n|$.
+	\item Resolver (\ref{eqn:phisemiimplicito}) para $\phi_h^{n+1}$.
+	\item Reinicializar $\phi_h^{n+1}$ \emph{solo si} $\max_{\Omega_h^\Gamma}\big||\nabla\phi_h^{n+1}|-1\big|>\mathrm{tol}$ (la extensión por $\nabla\phi\cdot\nabla u=0$ conserva la propiedad de distancia, por lo que no hace falta reinicializar en cada paso).
+	\item Elegir $\Delta t_{n+1}=\mathrm{CFL}\;h/\max|F_h|$ con $\mathrm{CFL}\in[0.5,1]$.
+\end{enumerate}
+
+\subsection{Variante de mayor robustez (opcional)}
+
+Si $\Delta t\sim h$ resultara aún insuficiente por la precisión de primer orden del estabilizador, se puede tratar la curvatura de forma totalmente implícita: linealizar $\kappa(\phi^{n+1})\approx\kappa^n-\Delta_\Gamma\eta-|II|^2\eta$ con $\eta=-\Delta t\,V_n^{n+1}$ y resolver el sistema acoplado $(P,\eta)$ por iteración de punto fijo o Newton--Krylov, usando el esquema anterior como precondicionador. Es más costoso por paso, pero admite $\Delta t$ aún mayores.
+
+\subsection{Plan de validación}
+\begin{enumerate}
+	\item Solución radial exacta (Sección ``Solución exacta del crecimiento tumoral con simetría radial''): orden de convergencia en $\Delta t$ y $h$.
+	\item Circunferencia perturbada con un modo $k$: comparar la tasa de decaimiento/crecimiento con la relación de dispersión lineal y medir el $\Delta t_{\max}$ estable frente a $h$ (esperado $\sim h^3$ con características, $\sim h$ con el nuevo esquema).
+	\item Comparar tiempo total de CPU y conservación del área/volumen frente al método de características para el mismo tiempo final.
+\end{enumerate}
