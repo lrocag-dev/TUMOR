@@ -284,3 +284,29 @@ Con paso $2d$ el error de B1 empeora ($0.109$, $0.042$, $0.019$ para $n=60,100,1
 \paragraph{Experimento $r_0=1$} ($n=60$, $\Delta t=0.002$, $t=0.3$): asimetría $0.030$ con diferencias centrales de paso $h$ ($0.034$ con paso $2h$), frente a $0.037$ con la aproximación débil y $0.034$ con la curvatura exacta $1/r$. La diferencia entre métodos de curvatura está dentro de lo que cambia al usar la curvatura exacta, por lo que la curvatura no explica la pérdida de simetría (ver la sección anterior).
 
 \paragraph{Robustez en la banda.} Durante la evolución del círculo, $\max|\kappa_h-1/r|$ sobre todos los nodos de la banda fue $0.94$ con la aproximación débil en $t=0.3$ (con valores de $\kappa_h$ entre $-0.50$ y $1.03$, en nodos del borde de la banda) y $0.14$ con diferencias centrales (con valores entre $0.30$ y $0.60$). Las diferencias centrales no producen valores atípicos en el borde de la banda. En el experimento $r_0=1$ esto no cambió el resultado, pero no se probó en evoluciones largas de B1.
+
+\subsection{Curvatura por la formulación variacional}
+
+También se evaluó la formulación variacional del Capítulo 3 (bloque comentado): $N_h\in[\mathbb{P}_2]^2$ como proyección $L^2$ de $\nabla\phi_h/|\nabla\phi_h|$ sobre la banda y $K_h\in\mathbb{P}_2$ tal que
+\[
+\int_{\Omega_h^\Gamma}K_hv+\sigma_K h\sum_{E\in\mathcal{F}_h^\Gamma}\int_E[\partial_nK_h][\partial_nv]
+=\int_{\partial\Omega_h^\Gamma}(N_h\cdot n)v-\int_{\Omega_h^\Gamma}N_h\cdot\nabla v ,
+\]
+con $\sigma_K=0.01$ (en B1 con $n=60$ el error medio fue $0.0198$, $0.0216$ y $0.0219$ para $\sigma_K=0.01,0.1,1$, es decir poco sensible a $\sigma_K$). Está disponible como \texttt{usekfd=2} en \texttt{edp/crecimientotumoranocircularFD.edp}.
+
+Error medio / máximo de $\kappa_h$ sobre la curva exacta:
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Caso & Débil (original) & Dif. centrales & Variacional\\
+\midrule
+Círculo $R=2$, $n=60$ & $1.5\times10^{-4}$ / $4.3\times10^{-4}$ & $3.1\times10^{-4}$ / $5.5\times10^{-4}$ & $1.4\times10^{-3}$ / $6.8\times10^{-3}$\\
+Círculo $R=2$, $n=100$ & $5.3\times10^{-5}$ / $1.6\times10^{-4}$ & $1.1\times10^{-4}$ / $2.0\times10^{-4}$ & $7.8\times10^{-4}$ / $4.5\times10^{-3}$\\
+B1, $n=100$ & $0.0045$ / $0.090$ & $0.0109$ / $0.100$ & $0.0073$ / $0.158$\\
+B1, $n=150$ & $0.0021$ / $0.038$ & $0.0049$ / $0.044$ & $0.0040$ / $0.080$\\
+\bottomrule
+\end{tabular}
+\end{center}
+La formulación variacional es la menos exacta en el círculo (un orden de magnitud peor que la débil, con convergencia más lenta: $1.4\times10^{-3}\to7.8\times10^{-4}$ de $n=60$ a $100$) y queda entre las otras dos en el error medio de B1, con el mayor error máximo.
+
+Experimento $r_0=1$ ($n=60$, $\Delta t=0.002$): asimetría $0.0276$ en $t=0.3$ (radio medio $2.2276$, exacto $2.2419$), dentro del rango de los demás métodos ($0.037$ débil, $0.030$ dif. centrales, $0.034$ curvatura exacta), de modo que tampoco explica la pérdida de simetría. En los nodos del borde de la banda $\max|\kappa_h-1/r|$ llegó a $1.10$ en $t=0.3$ (valores de $\kappa_h$ entre $0.28$ y $1.58$), peor que la aproximación débil ($0.94$) y que las diferencias centrales ($0.14$).

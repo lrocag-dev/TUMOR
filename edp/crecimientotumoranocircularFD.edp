@@ -12,7 +12,8 @@ include "ffmatlib.idp"
 verbosity = 0;
 // Curvatura por diferencias centrales de 2.o orden (malla cuadrada, paso = lado de la malla):
 // kappa = (phi_xx phi_y^2 - 2 phi_x phi_y phi_xy + phi_yy phi_x^2)/|grad phi|^3
-int usekfd=1;  // 1: diferencias centrales, 0: aproximacion debil original
+int usekfd=1;  // 1: diferencias centrales, 2: formulacion variacional (proyeccion L2 de div N_h), 0: aproximacion debil original
+real sgk=0.01; // penalizacion fantasma de la formulacion variacional
 macro kfdexpr(d) ( ( (phih(x+d,y)-2.*phih(x,y)+phih(x-d,y))/(d*d) * ((phih(x,y+d)-phih(x,y-d))/(2.*d))^2 - 2.*((phih(x+d,y)-phih(x-d,y))/(2.*d))*((phih(x,y+d)-phih(x,y-d))/(2.*d))*((phih(x+d,y+d)-phih(x+d,y-d)-phih(x-d,y+d)+phih(x-d,y-d))/(4.*d*d)) + (phih(x,y+d)-2.*phih(x,y)+phih(x,y-d))/(d*d) * ((phih(x+d,y)-phih(x-d,y))/(2.*d))^2 ) / (((phih(x+d,y)-phih(x-d,y))/(2.*d))^2+((phih(x,y+d)-phih(x,y-d))/(2.*d))^2+1e-12)^1.5 ) //EOM
 
 int MALLADIAGONAL=0;
@@ -470,6 +471,18 @@ for (it=it0; it<maxit; it++) {
   if (usekfd==1){
     real dd = meshsiz/sqrt(2.); // lado de la malla cuadrada
     kappa = kfdexpr(dd);
+  }
+  else if (usekfd==2){
+    // K_h = proyeccion L2 de div(N_h), N_h = proyeccion de grad(phi)/|grad(phi)|, con penalizacion fantasma
+    fespace Nhv(ThGam,P2);
+    Nhv N1h,N2h,wN;
+    solve projN1(N1h,wN,solver=sparsesolver) = int2d(ThGam)(N1h*wN) - int2d(ThGam)( dx(phih)/sqrt(eps1^2+dx(phih)^2+dy(phih)^2)*wN );
+    solve projN2(N2h,wN,solver=sparsesolver) = int2d(ThGam)(N2h*wN) - int2d(ThGam)( dy(phih)/sqrt(eps1^2+dx(phih)^2+dy(phih)^2)*wN );
+    Bh Kv,vK;
+    solve projK(Kv,vK,solver=sparsesolver) = int2d(ThGam)(Kv*vK)
+       + intalledges(ThGam)(sgk*hTriangle*(InternalEdge)*jump(N.x*dx(Kv)+N.y*dy(Kv))*jump(N.x*dx(vK)+N.y*dy(vK))/nTonEdge)
+       - int1d(ThGam)((N1h*N.x+N2h*N.y)*vK) + int2d(ThGam)(N1h*dx(vK)+N2h*dy(vK));
+    kappa = Kv;
   }
   else if (gradPol==1){
   curvaturaP1(phih,Bh,BhGlob,ThGam,kappa,Gam2Glob);
