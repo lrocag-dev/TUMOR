@@ -233,3 +233,26 @@ El radio medio es correcto (error $0.7\%$ con $n=60$, $0.07\%$ con $n=100$), per
 	\item Diagnóstico de la velocidad calculada sobre el círculo $r=R_{\rm ex}$ ($t=0.12$, $R=1.51$): $\partial_nP$, que debería ser $0$ (en el caso radial $P$ es constante), varía entre $-0.12$ y $0.18$ con un patrón de periodo $90^\circ$ ligado a la malla ($-0.092$, $0.181$, $-0.093$, $0.071$ en $0^\circ,45^\circ,90^\circ,135^\circ$). $\partial_nU$ varía entre $0.588$ y $0.603$ (exacto $0.599$; media $0.596$), y al multiplicar por $G=20$ aporta una dispersión de $0.29$ en $V_n$. La velocidad calculada $v_D$ varía entre $4.17$ y $4.49$ (exacto $4.42$).
 \end{itemize}
 La causa es entonces el error, dependiente de la orientación de la malla, en el gradiente normal de las soluciones de $P$ y $U$ obtenidas con $\phi$-FEM, y no el transporte ni la curvatura. Ese error se integra en el tiempo y produce la deformación. Posibles remedios (no probados): calcular el flujo $\partial_n u$ de manera consistente (por ejemplo con la formulación dual con variable de flujo $y=-\nabla u$ que aparece comentada en el Capítulo 3, o recuperación de gradiente), usar grado mayor en $U$ y $P$, y emplear mallas simétricas.
+
+\paragraph{Elementos de grado 3 (macro \texttt{gradPol3}).} Mismo experimento ($r_0=1$, $n=60$, $\Delta t=0.002$, $t_{\max}=0.3$), con $U$ y $P$ en $\mathbb{P}_3$, $\phi$ en $\mathbb{P}_4$, $\kappa$ en $\mathbb{P}_1$ y los mismos parámetros de estabilización ($\gamma=\sigma=20$). Asimetría y radio medio (exacto: $1.2054$, $1.4232$, $1.8580$, $2.2419$):
+
+\begin{center}
+\begin{tabular}{c|cc|cc|cc}
+\toprule
+ & \multicolumn{2}{c|}{$\mathbb{P}_2$ (original)} & \multicolumn{2}{c|}{$\mathbb{P}_3$, $S\in\mathbb{P}_1$} & \multicolumn{2}{c}{$\mathbb{P}_3$, $S\in\mathbb{P}_3$}\\
+$t$ & $r_{\rm media}$ & asim. & $r_{\rm media}$ & asim. & $r_{\rm media}$ & asim.\\
+\midrule
+$0.05$ & $1.2060$ & $0.0040$ & $1.2057$ & $0.0028$ & $1.1326$ & $0.139$\\
+$0.10$ & $1.4240$ & $0.0063$ & $1.4227$ & $0.0037$ & $1.1179$ & $0.385$\\
+$0.20$ & $1.8527$ & $0.0192$ & $1.8529$ & $0.0100$ & $0.9682$ & $0.777$\\
+$0.30$ & $2.2260$ & $0.0372$ & $2.2275$ & $0.0293$ & $0.7964$ & $0.912$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{itemize}
+	\item En $t=0$ el $\mathbb{P}_3$ da $\partial_nU$ prácticamente exacto ($0.44638$ frente al exacto $0.44639$, dispersión $2\times10^{-5}$), pero la dispersión de $\partial_nP$ (que debe ser $0$) no mejora: $[-0.015,0.012]$ frente a $[-0.006,0.008]$ en $\mathbb{P}_2$.
+	\item Con la extensión de la velocidad también en $\mathbb{P}_3$ ($S\in\mathbb{P}_3$) la simulación se desestabiliza (en $t=0.12$ las soluciones de $U$ y $P$ ya son incoherentes, p.\,ej.\ $\partial_nU\in[-0.07,0.72]$); en $t=0$ ya se observa $S\cdot n\in[3.56,3.90]$ frente a $v_D\approx3.93$.
+	\item Con $S\in\mathbb{P}_1$ la asimetría mejora durante $t\le0.2$ (p.\,ej.\ $0.0100$ frente a $0.0192$ en $t=0.2$) pero crece rápido después ($0.0293$ en $t=0.3$, solo $21\%$ menos que en $\mathbb{P}_2$) y el radio medio no mejora. En $t=0.12$ aparecen valores atípicos locales ($\partial_nU=0.527$ en $45^\circ$ frente al exacto $0.599$; $v_D$ mínimo $2.08$).
+\end{itemize}
+Por tanto, con los parámetros actuales, pasar a $\mathbb{P}_3$ no resuelve la pérdida de simetría: el error pasa de una dispersión suave dependiente de la malla a valores atípicos puntuales. Es probable que $\gamma$ y $\sigma$ (elegidos para $\mathbb{P}_2$) deban aumentarse con el grado, pero eso no se ha probado.
