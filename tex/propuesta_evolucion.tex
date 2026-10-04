@@ -310,3 +310,31 @@ B1, $n=150$ & $0.0021$ / $0.038$ & $0.0049$ / $0.044$ & $0.0040$ / $0.080$\\
 La formulación variacional es la menos exacta en el círculo (un orden de magnitud peor que la débil, con convergencia más lenta: $1.4\times10^{-3}\to7.8\times10^{-4}$ de $n=60$ a $100$) y queda entre las otras dos en el error medio de B1, con el mayor error máximo.
 
 Experimento $r_0=1$ ($n=60$, $\Delta t=0.002$): asimetría $0.0276$ en $t=0.3$ (radio medio $2.2276$, exacto $2.2419$), dentro del rango de los demás métodos ($0.037$ débil, $0.030$ dif. centrales, $0.034$ curvatura exacta), de modo que tampoco explica la pérdida de simetría. En los nodos del borde de la banda $\max|\kappa_h-1/r|$ llegó a $1.10$ en $t=0.3$ (valores de $\kappa_h$ entre $0.28$ y $1.58$), peor que la aproximación débil ($0.94$) y que las diferencias centrales ($0.14$).
+
+\subsection{Recuperación de gradiente}
+
+En \texttt{edp/crecimientotumoranocircularRG.edp} (variable \texttt{grec}) el gradiente de $P$ y de $U$ usado en la velocidad ($V=-\nabla P+G\nabla U-AGx/2$) se sustituye por su proyección $L^2$ continua sobre $\mathbb{P}_1$ (\texttt{grec=1}) o $\mathbb{P}_2$ (\texttt{grec=2}), definida sobre la malla $\mathcal{T}_h$ del dominio ficticio: $(G_h,w)=(\nabla u_h,w)$ para todo $w$.
+
+\paragraph{Resultados} (experimento $r_0=1$, $n=60$, $\Delta t=0.002$; exacto $R(0.3)=2.2419$):
+\begin{center}
+\begin{tabular}{c|cc|cc|cc|cc}
+\toprule
+ & \multicolumn{2}{c|}{Original} & \multicolumn{2}{c|}{Recup. $\mathbb{P}_1$} & \multicolumn{2}{c|}{Recup. $\mathbb{P}_2$} & \multicolumn{2}{c}{Original, $n=100$}\\
+$t$ & $r_{\rm media}$ & asim. & $r_{\rm media}$ & asim. & $r_{\rm media}$ & asim. & $r_{\rm media}$ & asim.\\
+\midrule
+$0.05$ & $1.2060$ & $0.0040$ & $1.2061$ & $0.0040$ & $1.2059$ & $0.0042$ & $1.2060$ & $0.0021$\\
+$0.10$ & $1.4240$ & $0.0063$ & $1.4239$ & $0.0058$ & $1.4244$ & $0.0062$ & $1.4243$ & $0.0040$\\
+$0.20$ & $1.8527$ & $0.0192$ & $1.8505$ & $0.0135$ & $1.8561$ & $0.0128$ & $1.8583$ & $0.0101$\\
+$0.30$ & $2.2260$ & $0.0372$ & $2.2207$ & $0.0235$ & $2.2334$ & $0.0225$ & $2.2403$ & $0.0160$\\
+\bottomrule
+\end{tabular}
+\end{center}
+La recuperación reduce la asimetría en $t=0.3$ en aproximadamente $40\%$ ($0.0372\to0.0235$ con $\mathbb{P}_1$, $0.0225$ con $\mathbb{P}_2$); con $\mathbb{P}_2$ además mejora el radio medio ($2.2334$, error $0.38\%$ frente a $0.71\%$), mientras que con $\mathbb{P}_1$ lo empeora ($2.2207$). No alcanza la asimetría obtenida con la malla $n=100$ sin recuperación ($0.0160$).
+
+En $t=0.12$ ($R=1.51$), sobre el círculo exacto: $\partial_nU$ tiene un rango de $0.590$--$0.601$ con $\mathbb{P}_1$ y $0.588$--$0.603$ con $\mathbb{P}_2$ (original $0.588$--$0.603$; exacto $0.599$), es decir, la recuperación apenas cambia la dispersión de $\partial_nU$. La dispersión de $\partial_nP$ (que debe ser $0$) no mejora: $[-0.116,0.215]$ y $[-0.119,0.194]$ frente a $[-0.12,0.18]$. Por tanto la mejora observada no proviene de suavizar el gradiente de $P$; el error de $\partial_nP$ es un error de la solución $P_h$ misma, no del cálculo de su derivada.
+
+\paragraph{La solución simétrica es estable en este modelo.} Se linealizó el modelo sobre un círculo de radio $R$ con perturbación $r=R+\delta\cos(l\theta)$, usando $\delta\kappa=\delta(l^2-1)/R^2$, $u_1=-U_0'(R)\,\delta\,I_l(r)/I_l(R)$ y $p_1=a\,(r/R)^l$ con $a=\delta[(l^2-1)/R^2-AGR/2]$. La amplitud evoluciona como $\dot\delta=\sigma_l(R)\,\delta$ con
+\[
+\sigma_l(R)=-\frac{l}{R}\Big[\frac{l^2-1}{R^2}-\frac{AGR}{2}\Big]+G\Big[1-\frac{U_0'}{R}-U_0'\Big(\frac{I_{l-1}(R)}{I_l(R)}-\frac{l}{R}\Big)\Big]-\frac{AG}{2},\quad U_0'=\frac{I_1(R)}{I_0(R)}.
+\]
+Con $A=0.5$, $G=20$, $\sigma_l<0$ para todo $l=2,\dots,8$ y $R\in[1,2.2]$ (p.\,ej.\ $\sigma_4(1.5)=-24.3$, $\sigma_2(2.2)=-0.29$); integrando $R(t)$ el modo $l=4$ se amortigua por un factor $\approx10^{-2}$ entre $t=0.05$ y $0.3$. Así, una perturbación de la forma no puede crecer físicamente en este régimen, y el crecimiento observado de la asimetría ($\times9$ de $t=0.05$ a $0.3$) es un efecto numérico: un error forzante, dependiente de la orientación de la malla, que se acumula, no una inestabilidad física amplificada. Comprobación de coherencia (no demostración): en el experimento A ($r_0=2.1+0.5\cos2\theta$), $\sigma_2(2.1)\approx-0.6$ predice una amplitud $0.485$ en $t=0.05$ y se observa $0.483$. La derivación se hizo a mano y no se contrastó con una fuente.
