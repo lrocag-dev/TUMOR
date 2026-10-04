@@ -338,3 +338,39 @@ En $t=0.12$ ($R=1.51$), sobre el círculo exacto: $\partial_nU$ tiene un rango d
 \sigma_l(R)=-\frac{l}{R}\Big[\frac{l^2-1}{R^2}-\frac{AGR}{2}\Big]+G\Big[1-\frac{U_0'}{R}-U_0'\Big(\frac{I_{l-1}(R)}{I_l(R)}-\frac{l}{R}\Big)\Big]-\frac{AG}{2},\quad U_0'=\frac{I_1(R)}{I_0(R)}.
 \]
 Con $A=0.5$, $G=20$, $\sigma_l<0$ para todo $l=2,\dots,8$ y $R\in[1,2.2]$ (p.\,ej.\ $\sigma_4(1.5)=-24.3$, $\sigma_2(2.2)=-0.29$); integrando $R(t)$ el modo $l=4$ se amortigua por un factor $\approx10^{-2}$ entre $t=0.05$ y $0.3$. Así, una perturbación de la forma no puede crecer físicamente en este régimen, y el crecimiento observado de la asimetría ($\times9$ de $t=0.05$ a $0.3$) es un efecto numérico: un error forzante, dependiente de la orientación de la malla, que se acumula, no una inestabilidad física amplificada. Comprobación de coherencia (no demostración): en el experimento A ($r_0=2.1+0.5\cos2\theta$), $\sigma_2(2.1)\approx-0.6$ predice una amplitud $0.485$ en $t=0.05$ y se observa $0.483$. La derivación se hizo a mano y no se contrastó con una fuente.
+
+\subsection{Origen del error de $\nabla P$: dato de Dirichlet sobre $\Gamma_h$}
+
+Experimento $r_0=1$ ($n=60$, $\Delta t=0.002$, $t=0.3$), sustituyendo por su valor exacto distintas partes de la velocidad (exacto: $R(0.3)=2.2419$):
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Variante & $r_{\rm media}(0.3)$ & asimetría $t=0.2$ & asimetría $t=0.3$\\
+\midrule
+Original & $2.2260$ & $0.0192$ & $0.0372$\\
+Dato de Dirichlet de $P$ constante exacto $1/R-AGR^2/4$ & $2.2268$ & $0.0111$ & $0.0180$\\
+$\nabla P:=0$ (exacto) & $2.2268$ & $0.0111$ & $0.0180$\\
+$\nabla U$ exacto $U_0'(R)\,x/|x|$ & $2.2422$ & $0.0132$ & $0.0357$\\
+Velocidad exacta completa & $2.2412$ & $0.0010$ & $0.0010$\\
+\bottomrule
+\end{tabular}
+\end{center}
+\begin{itemize}
+	\item Con el dato constante exacto, el $\phi$-FEM devuelve $P_h\equiv$ const a precisión de máquina ($\partial_nP\sim10^{-11}$) y los resultados coinciden con los de $\nabla P:=0$. Es decir, el método para resolver $P$ es correcto: \emph{el error de $\partial_nP$ proviene del dato $g=\kappa_h-AG|x|^2/4$ evaluado sobre $\Gamma_h$, no de la discretización del problema elíptico.}
+	\item Eliminar el error de $P$ reduce la asimetría a la mitad ($0.0372\to0.0180$). Eliminar solo el error de $\nabla U$ casi no la cambia ($0.0357$), aunque sí mejora el radio medio ($2.2422$). Con ambos exactos la asimetría desaparece ($0.001$). Los errores de $P$ y de $U$ combinan aproximadamente en cuadratura ($\sqrt{0.0357^2+0.018^2}\approx0.040$).
+\end{itemize}
+
+\paragraph{Contenido del dato $g$ sobre $\Gamma_h$} ($t=0.124$, $R=1.512$). Amplitudes de Fourier $m$ de $r(\theta)$, $\kappa_h$ y $g=\kappa_h-AG\,r^2/4$ sobre la curva $\phi_h=0$:
+\begin{center}
+\begin{tabular}{cccccc}
+\toprule
+$m$ & $|r_m|$ & $|\kappa_m|$ observado & $(m^2-1)|r_m|/R^2$ esperado & $|g_m|$ observado & $|g_m|$ esperado\\
+\midrule
+$2$ & $0.0020$ & $0.0085$ & $0.0026$ & $0.0069$ & $0.0124$\\
+$4$ & $0.0031$ & $0.0116$ & $0.0201$ & $0.0115$ & $0.0031$\\
+$6$ & $0.0008$ & $0.0128$ & $0.0123$ & $0.0068$ & $0.0108$\\
+$8$ & $0.0004$ & $0.0032$ & $0.0109$ & $0.0059$ & $0.0071$\\
+\bottomrule
+\end{tabular}
+\end{center}
+(``esperado'' usa la linealización de la sección anterior, $g_m=[(m^2-1)/R^2-AGR/2]\,r_m$.) La curvatura $\kappa_h$ captura solo el $58\%$ de la variación de curvatura del modo $m=4$ y el $30\%$ del $m=8$, y contiene contenido espurio en $m=2$ ($0.0085$ frente a $0.0026$). Por eso el dato $g$ no cancela el término $AGR\,r_m/2$ como debería y aparece un $\partial_nP$ espurio ($|g_4|=0.0115$ frente a $0.0031$ esperado, es decir $3.7$ veces mayor). Hay una incoherencia sin explicar: con $\kappa=1/r$ (que no contiene ninguna curvatura de la perturbación y empeora $|g_4|$ a $\approx0.023$) la asimetría final era igual ($0.034$); por tanto el dato $g$ explica la mitad de la asimetría pero la relación entre error del dato y asimetría no es simple.
