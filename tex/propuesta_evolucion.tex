@@ -134,3 +134,20 @@ $0.040$ & $0.0131$ & $0.0103$ & $0.0155$ & $0.0194$ & $0.0098$ & $0.0150$\\
 \end{center}
 
 El método de características pierde precisión a partir de $\Delta t\approx0.02$ para $n=100$ y ya en $\Delta t=0.008$ para $n=150$ (el $\Delta t$ útil disminuye al refinar, como predice el análisis), mientras que el esquema semi-implícito mantiene un error casi constante ($\approx0.01$) hasta $\Delta t=0.04$ en todas las mallas. En $n=150$ la ventaja medida es de un factor $\ge5$ en el paso de tiempo útil (de $0.004$ a $\ge0.04$, que fue el mayor probado, de modo que es una cota inferior). No se observó \emph{blow-up} en ninguna corrida. El sesgo del esquema semi-implícito ($\approx0.01$) no disminuye al refinar la malla ni al reducir $\Delta t$; su origen no está aislado todavía, y por ahora limita la precisión alcanzable con este esquema frente al método de características con $\Delta t$ pequeño.
+
+\paragraph{Origen del sesgo (prueba con $c_\theta=0$).} Con $n=100$, $t=0.04$ y la misma referencia, se repitió el esquema sin estabilizador ($c_\theta=0$), con y sin SUPG:
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$\Delta t$ & $c_\theta=0$, SUPG & $c_\theta=0$, sin SUPG & $c_\theta=0.5$, SUPG\\
+\midrule
+$0.002$ & $0.0019$ & $0.0019$ & ---\\
+$0.004$ & $0.0009$ & $0.0021$ & $0.0084$\\
+$0.008$ & $0.0018$ & $0.0028$ & $0.0092$\\
+$0.020$ & $0.0049$ & $0.0063$ & $0.0112$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Conclusiones: (i) el sesgo de $\approx0.01$ proviene del estabilizador $\theta_h$ y no del transporte (Crank--Nicolson, SUPG, $\mathbb{P}_2$), que da errores de $0.001$--$0.005$; (ii) SUPG aporta una mejora modesta; (iii) con $\theta_h=0$ el esquema es estable incluso con $\Delta t=0.02$ en este experimento, es decir, en el experimento A (frontera suave, solo el modo $k=2$) el estabilizador \emph{no es necesario} y estos ensayos no demuestran todavía su efecto estabilizante. El error se concentra en los puntos de menor radio ($\theta=\pi/2,3\pi/2$), donde la frontera queda retrasada hasta $0.008$ respecto de la referencia. El sesgo tampoco crece linealmente con $c_\theta$ ($0.006$ con $0.25$ y $0.013$ con $2$ a $n=60$), por lo que su mecanismo no está identificado. Además, la afirmación anterior de que el término estabilizador se anula con $\Delta t\to0$ en el sentido de dar un error $O(\Delta t)$ no se observó en los datos (el error casi no cambia entre $\Delta t=0.004$ y $0.04$). Quedan por probar: (a) un caso con frontera irregular y modos altos (experimentos B1 o C), que es donde el método de características exige $\Delta t$ muy pequeño y donde el estabilizador debería ser necesario; (b) limitar el estabilizador a una banda alrededor de $\Gamma$.
