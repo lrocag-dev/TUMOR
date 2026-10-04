@@ -1,0 +1,32 @@
+%\chapter{\MakeUppercase{Conclusiones y Recomendaciones}}
+%%\chapter{Conclusiones}
+%\thispagestyle{fancy}
+%%\addcontentsline{toc}{chapter}{Conclusiones}
+%\begin{itemize}
+%	\item Se ha demostrado la existencia y unicidad de la solución numérica del problema de la concentración de nutrientes al interior de un tumor con frontera determinada por una función conjunto de nivel.
+%	\item Se ha demostrado la existencia y unicidad de la solución numérica del problema de la presión intracelular en un tumor con frontera determinada por una función conjunto de nivel.
+%	\item Se ha encontrado una extensión desde una curva de nivel a un dominio rectangular de la velocidad de crecimiento tumoral mediante una aproximación por elementos finitos. 
+%	\item Se ha implementado un algoritmo para la evolución del crecimiento tumoral por medio del método de elementos finitos definidos sobre un domino rectangular.
+%	\item Se ha realizado la simulación numérica del crecimiento tumoral para diferentes fronteras y niveles de vascularización, y los resultados obtenidos concuerdan con los comportamientos registrados en la literatura: crecimiento acelerado del tumor, estabilización alrededor de una solución estacionario o la extinción del tumor. 
+%\end{itemize}
+
+\chapter{\MakeUppercase{Conclusiones}}
+%\chapter{\MakeUppercase{Conclusiones y Recomendaciones}}
+%\chapter{Conclusiones y Recomendaciones}
+\thispagestyle{fancy}
+%%\addcontentsline{toc}{chapter}{Conclusiones}
+\section{Conclusiones}
+\begin{itemize}
+	\item Se ha demostrado la existencia y unicidad de la solución numérica del problema de la concentración de nutrientes al interior de un tumor con frontera determinada por una función conjunto de nivel.
+	\item Se ha demostrado la existencia y unicidad de la solución numérica del problema de la presión intracelular en un tumor con frontera determinada por una función conjunto de nivel.
+	\item Se ha encontrado una extensión desde una curva de nivel a un dominio rectangular de la velocidad de crecimiento tumoral mediante una aproximación por elementos finitos. 
+	\item Se ha implementado un algoritmo para la evolución del crecimiento tumoral por medio del método de elementos finitos definidos sobre un domino rectangular.
+	\item Se ha realizado la simulación numérica del crecimiento tumoral para diferentes fronteras y niveles de vascularización, y los resultados obtenidos concuerdan con los comportamientos registrados en la literatura: crecimiento acelerado del tumor, estabilización alrededor de una solución estacionario o la extinción del tumor. 
+\end{itemize}
+\section{Recomendaciones}
+\begin{itemize}
+	\item Es preciso desarrollar el análisis teórico del error que valide las experiencias numéricas presentadas en este trabajo.
+	\item Es posible resolver la ecuación de evolución  en una región muy próxima a la frontera libre pues solo interesa el comportamiento de una curva de nivel y no es necesario resolver sobre todo el dominio rectangular, este enfoque se conoce en la literatura como \emph{narrow band level set method}.
+	\item Es importante que la función conjunto de nivel  $\phi$ conserve la propiedad de distancia dirigida en una región próxima a la frontera libre $\Gamma$ mediante algún proceso de reinicialización que controle el valor de $\|\nabla \phi \|$.
+	\item Es necesario considerar el proceso de necrosis, es decir si la concentración de nutrientes cae por debajo de un umbral dado entonces las células de tumor mueren, esto da lugar a problemas de Poisson con término fuente. 
+\end{itemize}

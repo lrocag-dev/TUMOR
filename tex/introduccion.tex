@@ -1,0 +1,19 @@
+\chapter*{\MakeUppercase{Introducción}}
+%\chapter*{Introducción}
+\addcontentsline{toc}{chapter}{\MakeUppercase{Introducción}}
+%\addcontentsline{toc}{chapter}{Introducción}
+\thispagestyle{fancy}
+La simulación numérica del crecimiento tumoral por medio del Método de Elementos Finitos involucra resolver varios problemas, en primer lugar la frontera $\Gamma$ evoluciona con una velocidad $V_n$ que depende de las condiciones internas del tumor, como la presión y la concentración de nutrientes; el cálculo de la velocidad involucra la solución de problemas elípticos sobre un dominio que cambia con el tiempo; además la frontera satisface una ecuación de advección no lineal. 
+
+El objetivo de la tesis consiste en realizar una aproximación numérica de la evolución de la frontera de un tumor avascular por medio del Método de los Elementos Finitos. Cada uno de los problemas planteados se resuelve sobre  un  dominio ficticio $\mathcal{O}$ particionado con una malla triangular uniforme $\mathcal{T}_h^\mathcal{O}$, donde se define una función continua $\phi$ que representa la frontera del tumor por medio de una curva de nivel 0. Los problemas elípticos asociados a la presión y la concentración de nutrientes se resuelven al interior del  tumor, teniendo en cuenta que la frontera donde se imponen las condiciones de tipo Dirichlet no coincide necesariamente con las aristas de  $\mathcal{T}_h^\mathcal{O}$. Para resolver la ecuación de advección no lineal que define la evolución de la frontera, se extiende $V_n$ al dominio ficticio $\mathcal{O}$ resolviendo un problema variacional lineal con condiciones  de frontera impuestas por penalización, para finamente aplicar el método de características de Galerkin que permite encontrar $\Gamma$ en el siguiente paso de tiempo.
+%
+%\section{Objetivos de la tesis}
+%El objetivo de la tesis es resolver numéricamente la ecuación de evolución de la frontera de un tumor avascular por medio del Método de Elementos Finitos. Para poder lograr el objetivo general es preciso resolver los siguiente problemas:
+%\begin{itemize}
+%	\item Encontrar una aproximación suave para la curvatura de la frontera del tumor.
+%	\item Formular y resolver problemas elípticos sobre regiones definidas por conjuntos de nivel, considerando que las condiciones de frontera deben imponerse sobre curvas de nivel y no sobre las aristas de los elementos. 
+%	\item Encontrar $V_{ext}$, una extensión de la velocidad de crecimiento $V_n$ que permita definir un problema de advección para $\phi$
+%	\item Resolver la ecuación de advección que rige la evolución de la frontera.
+%\end{itemize}
+%\section{Esquema de la tesis}
+

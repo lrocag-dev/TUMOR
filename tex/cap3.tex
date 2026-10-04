@@ -1,0 +1,976 @@
+\chapter{\MakeUppercase{Metodología del desarrollo de  resolución numérica del problema variacional asociado al crecimiento tumoral}}
+%\chapter{Metodología del desarrollo de  resolución numérica del problema variacional asociado al crecimiento tumoral}
+\thispagestyle{fancy}
+\section{Conceptos generales de la Teoría de Elementos Finitos}
+Ahora introduciremos la teoría del Método de Elementos Finitos (FEM),
+necesarios en la estimación del error y la determinación de la
+convergencia de las soluciones aproximadas, en su forma variacional. En lo que sigue
+consideramos $\Omega \subset \mathbb{R}^{2}$ un dominio poligonal,
+y $\mathbf{P}_{k}\left( F\right) $ como el espacio de polinomios
+en un conjunto $F$, de grado menor o igual que $k$.
+\begin{defi}[Triangulación]
+	\label{cond_trian}  Una triangulación es una partición $
+	\mathcal{T}_{h}\left( \Omega \right) $ del dominio $\Omega $ en un
+	número finito de triángulos $T$, llamados elementos, con la
+	siguientes propiedades
+	\begin{enumerate}
+		\item  $T\subset \overline{\Omega }\qquad \forall T\in \mathcal{T}_{h}\left( \Omega
+		\right) $
+		\item  $\overline{\Omega }=\bigsqcup\limits_{T\in \mathcal{T}_{h}\left(
+			\Omega \right) }T$
+		\item  $\stackrel{\circ }{T_{1}}\cap \stackrel{\circ }{T_{2}}=\emptyset
+		\qquad \forall T_{1},T_{2}\in \mathcal{T}_{h}\left( \Omega \right) $\ con $%
+		T_{1}\neq T_{2}.$
+	\end{enumerate}
+	Además $\forall T_{1},T_{2}\in \mathcal{T}_{h}\left( \Omega \right) $\
+	con $T_{1}\neq T_{2}$, se satisface sólo una de las siguientes
+	condiciones
+	\begin{enumerate}
+		\item  $T_{1}\cap T_{2}=\emptyset$.
+		\item  $T_{1}$\ y $T_{2}$\ tienen sólo un vértice común.
+		\item  $T_{1}$\ y $T_{2}$\ tienen sólo un lado común.
+	\end{enumerate}
+	Además $h$\ denota la mayor longitud de los lados de los elementos de la
+	triangulación.
+	\[
+	h=\max_{T\in \mathcal{T}_{h}\left( \Omega \right)
+	}\left\{ \max_{p,q\in T}\left\{ \left\|
+	p-q\right\| \right\} \right\}
+	\]
+\end{defi}
+\begin{defi}[Espacio de elementos finitos]
+	Definimos el espacio de elementos finitos correspondiente a la
+	triangulación $\mathcal{T}_{h}\left( \Omega \right) $ como el conjunto
+	\[
+	\mathbf{X}_{h}=\left\{ v_{h}\in \mathbf{C}\left( \overline{\Omega }\right)
+	:\left.v_{h}\right\vert _{T}\in \mathbf{P}_{k}\left( T\right) \quad \forall T\in \mathcal{%
+		T}_{h}\left( \Omega \right) \right\}
+	\]
+	Y escogemos sobre cada triángulo $T$ un conjunto de puntos (nodos) $\left\{
+	p_{i}\right\} _{i=1}^{I}$\ con $I=\dim \left( \mathbf{P}_{k}\left( T\right)
+	\right) $\ de tal manera que cualquier $v\in \mathbf{P}_{k}\left( T\right) $%
+	\ este únicamente determinada por sus valores en los nodos.
+\end{defi}
+En las aplicaciones haremos uso de los vértices de los triángulos
+como nodos y de polinomios grado menor o igual a 1 sobre cada elemento
+triangular.
+\begin{defi}[Interpolación]
+	Sea $\left\{ p_{i}\right\} _{i=1}^{N_{h}}$\ el conjunto de nodos de $%
+	\mathcal{T}_{h}\left( \Omega \right) $, y $\mathbf{X}_{h}$\ un espacio de
+	elementos finitos, definimos el operador $\Pi _{h}$ de interpolación
+	para $v\in \mathbf{C}\left( \overline{\Omega }\right) $ como
+	\[
+	\left\{
+	\begin{array}{l}
+		\Pi _{h}:\mathbf{C}\left( \overline{\Omega }\right) \rightarrow \mathbf{X}%
+		_{h}, \\
+		\forall v\in \mathbf{C}\left( \overline{\Omega }\right) ,\Pi _{h}v\left( p_{i}\right) =v\left( p_{i}\right) ,\forall i\in \left\{
+		1,..,N_{h}\right\}
+	\end{array}
+	\right.
+	\]
+\end{defi}
+
+\begin{teo}[{\cite[p. 412]{han2009theoretical}}]
+	Sea $\mathbf{X}_{h}$ un espacio de elementos finitos, y $k>0$, tal que $%
+	\mathbf{P}_{k}\left( T\right) \subset \mathbf{X}_{h}$ $\forall T\in \mathcal{%
+		T}_{h}\left( \Omega \right) $.\ Si los ángulos de $\mathcal{T}_{h}\left(
+	\Omega \right) $\ están acotados inferiormente por $\theta _{0}>0$,
+	independiente de $h$ entonces existe una constante $c$\ independiente de $h$%
+	\ tal que $\forall v\in \mathbf{H}^{k+1}\left( \Omega \right) $:
+	\[
+	\left\| v-\Pi _{h}v\right\| _{\mathbf{L}^{2}\left( \Omega \right) }\leqslant
+	ch^{k+1}\left| v\right| _{\mathbf{H}^{k+1}\left( \Omega \right) }\quad\text{y}\quad
+	\left\| v-\Pi _{h}v\right\| _{\mathbf{H}^{1}\left( \Omega \right) }\leqslant
+	ch^{k}\left| v\right| _{\mathbf{H}^{k+1}\left( \Omega \right) }
+	\]
+\end{teo}
+
+
+
+
+\section{Método de Elementos Finitos no ajustados a la frontera}
+Considere el problema de Poisson
+\[
+-\Delta u = f\text{ en }\Omega, u=g\text{ en }\Gamma 
+\]
+donde $\Omega\subset\mathbb{R}^2$ es un dominio con frontera suave $\Gamma$, con $f$ y $g$ son funciones definidas sobre $\Omega$ y $\Gamma$ respectivamente. Es usual que al aplicar el método de elementos finitos se escoja una malla que se ajuste a la frontera  $\Gamma$ y que las condiciones de tipo Dirichlet se impongan en los nodos que pertenecen a $\Gamma$. Así por ejemplo en \citep[Teorema 33.2 en p.~127]{ern2021finite} se hace el estudio del error en la solución aproximada:
+\[
+|u-u_h|_{H^1{(\Omega)}}\leq Ch^{k}|u|_{H^{1+k}(\Omega)}
+\]
+\[
+\|u-u_h\|_{L^2{(\Omega)}}\leq C_1 h^{k+1}|u|_{H^{1+k}(\Omega)}+C_2\|g-g_h\|_{L^2(\partial \Omega)}
+\]
+Sin embargo si la frontera cambia con el tiempo es necesario construir una malla adecuada en cada iteración, mas fina donde la frontera sea mas irregular y mas gruesa donde la frontera sea mas regular, lo que aumenta el costo computacional.
+
+
+\subsection{Discretización de las ecuaciones adimensionales }
+Consideramos aproximar la solución de la siguiente ecuación diferencial parcial elíptica con condiciones de frontera tipo Dirichlet
+\begin{equation}
+	-\Delta u+\beta u  = f \text{ en }  \Omega,\quad 	u = g \text{ en } \Gamma
+	\label{eqn:edpmodelo}
+\end{equation}
+que coincide con el problema del cálculo de la presión si $\beta=0$, $f=0$ y $g=\kappa-AG\left(\frac{x^2+y^2}{4}\right)$, y con el problema del cálculo de la concentración de nutrientes si $\beta=1$, $f=0$, $g=1$.
+
+El método de elementos finitos utilizado para aproximar la solución de la ecuación \ref{eqn:edpmodelo} está basado en el trabajo presentado por \citep{duprez2020phi}, para ello consideramos que el dominio $\Omega$ puede ser   inscrito  en un dominio rectangular $\mathcal{O}$ particionado por una malla $\mathcal{T}_h^\mathcal{O}$, que no está ajustada a la frontera libre $\Gamma$ por lo que los elementos triangulares cortan la frontera de manera arbitraria. Sea $\phi_h$ la interpolación de $\phi$ con elementos finitos de grado $l$  sobre $\mathcal{T}_h^{\mathcal{O}}$, es decir pertenece al siguiente espacio vectorial de dimensión finita: 
+\begin{equation}
+	\Phi_h= \left\{ v \in H^1(\mathcal{O}):\left.v\right\vert_T \in \mathbb{P}_l(T),\forall T \in \mathcal{T}_h^\mathcal{O} \right\}
+\end{equation}
+de manera que el dominio físico $\Omega:=\left\{\phi<0 \right \}$ es aproximado por $\left\{\phi_h<0 \right \}$ con frontera $\Gamma_h:=\left\{\phi_h=0 \right \}$, adicionalmente consideramos $\mathcal{T}_h$ como la submalla formada por los elementos que tienen intersección no vacía con el dominio aproximado $\{ \phi_h<0 \}$:
+\[
+\mathcal{T}_h = \left\{ T\in \mathcal{T}_h^ \mathcal{O} : T\cap \{ \phi_h<0 \}\neq  \emptyset \right\}
+\]
+Denotamos por $\Omega_h$ el dominio ocupado por $\mathcal{T}_h$, y será llamado dominio ficticio:
+\[
+\Omega_h = \left(\bigcup_{T\in \mathcal{T}_h} T\right)^\circ
+\]
+De igual manera llamamos dominio frontera $\Omega^\Gamma_h$, al dominio cubierto por  $\mathcal{T}^\Gamma_h$  una submalla de $\mathcal{T}_h$  compuesta por elementos que interceptan $\Gamma_h$, la frontera del dominio aproximado, como se muestra en la Figura 		\ref{fig:dominioficticio} :
+\[
+\mathcal{T}^\Gamma_h = \left\{ T \in \mathcal{T}_h : T\cap \{ \phi_h =0\}\neq \emptyset \right\}
+\]															\[
+\Omega^\Gamma_h= \left(\bigcup_{T\in \mathcal{T}^\Gamma_h} T\right)^\circ
+\]	
+también denotamos por $\Omega^i_h=\Omega_h \setminus\Omega^\Gamma_h$ y $\Gamma_h^i=\partial \Omega_h^i$.					
+\begin{figure}[H]
+	\centering\hfil
+	\includegraphics[width=0.4\linewidth]{dominioficticio.pdf}
+	\hfil
+	\includegraphics[width=0.4\linewidth]{dominiofrontera.pdf}
+	\caption{Izquierda: Dominio ficticio $\Omega_h$ compuesto por los triángulos que interceptan $\Omega$. Derecha: Dominio frontera $\Omega_h^\Gamma$ compuesto por los triángulos que interceptan $\Gamma_h$ 		\label{fig:dominioficticio}}
+	
+\end{figure}
+
+A continuación planteamos extender la solución de la ecuación \ref{eqn:edpmodelo} a una función $u$ definida sobre $\Omega_h$, y que es solución del siguiente problema:
+\begin{align}
+	-\Delta u+\beta u  = f &\text{ en }  \Omega_h\\
+	u = g& \text{ en } \Gamma_h
+\end{align}
+donde $\beta\geq 0$, y suponemos que $g$ está definida en $\Omega^\Gamma_h$, de manera que las condiciones de borde toman la forma 
+\begin{align}
+	u = g + \phi_h p\text{, en } \Omega^\Gamma_h
+\end{align}
+%por medio de la siguiente formulación variacional: Encontrar $u$  en  $\Omega_h$, y $p$  en $  \Omega_h^\Gamma$ tales que
+%\begin{equation}
+%\begin{split}
+%	\int_{\Omega_h}\nabla u \cdot \nabla v +\int_{\Omega_h}\beta uv - \int_{\partial \Omega_h}v(\nabla u \cdot n )
+%	+ \gamma  \int_{\Omega_h^\Gamma} (u-\phi_h p) (v-\phi_h q) &
+%	\\
+%	\qquad\qquad\qquad\qquad\qquad\qquad=\int_{\Omega_h} fv + \gamma \int_{\Omega_h^\Gamma} g (v-\phi_h q)&,\forall v \text{ en } 
+%	\Omega_h,q  \text{ en }  \Omega_h^\Gamma 
+%\end{split}
+%\end{equation}
+%donde $\gamma>0$. 
+%
+%Para resolver el problema de manera adecuada es necesario incluir términos de estabilización que aseguren la existencia de solución en el dominio ficticio.
+Definimos los espacios de elementos finitos sobre $\Omega_h$ y $\Omega_h^\Gamma$ respectivamente
+\begin{align}
+	V_h^{(k)}&= \left\{ v \in H^1(\Omega_h):\left.v\right\vert_T \in \mathbb{P}_k(T),\forall T \in \mathcal{T}_h\right\}\\
+	Q_h^{(k)}&= \left\{ q \in H^1(\Omega_h^\Gamma):\left.q\right\vert_T \in \mathbb{P}_k(T),\forall T \in \mathcal{T}_h^\Gamma\right\}\\
+	W_h^{(k)}&=	V_h^{(k)}	\times 	Q_h^{(k)}
+\end{align}
+
+La discretización de la solución de la  ecuación  \ref{eqn:edpmodelo} en el dominio ficticio, $u_h$ y la aproximación de la frontera libre, $\phi_h$ pueden utilizar polinomios de diferente grado ($k$ y $l$ respectivamente).
+
+\subsection{Problema variacional discreto}
+Definimos los siguientes términos de estabilización
+\begin{equation}
+	G_h(u,v)= \sigma h \sum_{E\in \mathcal{F}_h^\Gamma} \int_E \left[ \frac{\partial u}{\partial n} \right]
+	\left[ \frac{\partial v}{\partial n} \right]	
+\end{equation}
+\begin{equation}
+	J_h^{lhs}(u,v)=\sigma h^2 \sum_{T\in \mathcal{T}_h^\Gamma} \int_T (\Delta u-\beta u) (\Delta  v-\beta v),\quad
+	J_h^{rhs}(v)=-\sigma h^2 \sum_{T\in \mathcal{T}_h^\Gamma} \int_T f(\Delta  v-\beta v),\quad 
+\end{equation}
+Donde $\mathcal{F}_h^\Gamma$ es el conjunto de aristas interiores de la malla $\mathcal{T}_h$ que pertenecen a elementos que interceptan a $\Gamma_h$
+\[
+\mathcal{F}_h^\Gamma  = \left\{ e : e\cap \partial\Omega^\Gamma_h =\emptyset,  \exists T\in \mathcal{T}_h: T\cap \Gamma_h \neq \emptyset \wedge e\in \partial T \right\}
+\]
+$G_h$ es el término de penalidad fantasma, \textit{ghost penalty} \citep{burman2010ghost}, y tiene por objetivo penalizar los saltos del gradiente en las aristas de la malla frontera. $J_h^{lhs}$ ayuda a estabilizar las oscilaciones de la solución aproximada en los elementos que cortan $\Gamma_h$ y es consistente: si $u$ es la solución exacta entonces $J_h^{lhs}(u,v)=J_h^{rhs}(v)$.
+
+El problema discreto queda definido como sigue: 
+
+Encontrar $(u_h,p_h)\in W_h^{(k)}$ tal que
+\begin{equation}
+	a_h(u_h,p_h;v_h,q_h)=l_h(v_h,q_h)\text{ para todo } (v_h,q_h)\in W_h^{(k)}
+	\label{eqn:phifemdual}
+\end{equation}
+donde
+\begin{equation}
+	\begin{aligned}	
+		a_h(w,p;v,q)&:=	\int_{\Omega_h}\nabla w \cdot \nabla v
+		+	\int_{\Omega_h}\beta w  v
+		- \int_{\partial \Omega_h} \frac{\partial w}{\partial n}  v
+		+ \frac{\gamma}{h^2}  \int_{\Omega_h^\Gamma} (w-\frac{1}{h}\phi_h p) (v-\frac{1}{h}\phi_h q)
+		\\
+		&\qquad\qquad +G_h(w,v)+J_h^{lhs}(w,v)\\ 
+		l_h(v,q)&:= \int_{\Omega_h} fv + \frac{\gamma}{h^2}  \int_{\Omega_h^\Gamma} g_h (v-\frac{1}{h}\phi_h q)+J_h^{rhs}(v)
+	\end{aligned}
+\end{equation}
+donde $\gamma>0$ y $\sigma>0$ se escogen de manera independiente de $h$.
+
+Si consideramos las formas bilineales
+\begin{align}
+	a_{11}(w,v)=&	\int_{\Omega_h}\nabla w \cdot \nabla v +	\int_{\Omega_h} \beta wv-\int_{\partial \Omega_h}\frac{\partial w}{\partial n}v+  \frac{\gamma}{h^2} \int_{\Omega_h^\Gamma}wv    
+	+ G_h(w,v) + J_h^{lhs}(w,v)  %\nonumber
+	\\
+	a_{12}(p,v)=&	-\frac{\gamma}{h^3}  \int_{\Omega_h^\Gamma}  p \phi_h v
+	\\
+	a_{21}(w,q)=&	-\frac{\gamma}{h^3}  \int_{\Omega_h^\Gamma} w \phi_h q
+	\\
+	a_{22}(p,q)=&	\frac{\gamma}{h^4}  \int_{\Omega_h^\Gamma} \phi_h^2 p q
+\end{align}
+
+y las formas lineales
+\begin{align}
+	l_1(v) =&  \int_{\Omega_h} fv + \frac{\gamma}{h^2}  \int_{\Omega_h^\Gamma} g_h v +J_h^{rhs}(v)
+	\\
+	l_2(q)	=& - \frac{\gamma}{h^3}  \int_{\Omega_h^\Gamma} g_h \phi_h q
+\end{align}
+entonces
+\[
+\begin{aligned}
+	a_h(w,p;v,q) &= a_{11}(w,v) + a_{12}(p,v)  + a_{21}(w,q)+ a_{22}(p,q) \\
+	l(v,q) &=l_1(v)+l_2(q)
+\end{aligned}
+\]
+
+de modo que el problema discreto se puede escribir como la siguiente ecuación
+\[
+\begin{matrix}
+	&a_{11}(u,v) &+ &a_{12}(p,v) &  & \\
+	+&a_{21}(u,q) &+ &a_{22}(p,q) & = & l_1(v)+l_2(q), \forall (v_h,q_h)\in W_h
+\end{matrix}
+\]
+lo que nos lleva a un sistema matricial por bloques
+\[
+\begin{bmatrix}
+	A_{11} & A_{12} \\
+	A_{21} & A_{22} 
+\end{bmatrix}
+\begin{bmatrix}
+	\bm{u} \\
+	\bm{p} 
+\end{bmatrix}=
+\begin{bmatrix}
+	\bm{l}_1 \\
+	\bm{l}_2
+\end{bmatrix}
+\]
+donde observamos que $(A_{12})^T = A_{21}$, pues \[
+[A_{12}]_{ij}=a_{12}(w_j,v_i)=	-\frac{\gamma}{h^3}  \int_{\Omega_h^\Gamma} \phi_h w_j v_i=
+a_{21}(v_i,w_j)=[A_{21}]_{ji}
+\]
+Asi los problemas variacionales para aproximar la presión intracelular, $p_h$ y la concentración de nutrientes $c_h$ pueden escribirse  partir de la ecuación  
+\ref{eqn:phifemdual}:
+
+Para $\beta=1$, $g=0$, encontrar $(c_h,w_h)\in W_h^{(k)}$ tal que
+\begin{equation}
+	a_h(c_h,w_h;v_h,w_h)=l_h(v_h,q_h)\text{ para todo } (v_h,q_h)\in W_h^{(k)}
+	\label{eqn:problemach}
+\end{equation}
+
+Para $\beta=0$, $g=\kappa_h$, encontrar $(p_h,w_h)\in W_h^{(k)}$ tal que
+\begin{equation}
+	a_h(p_h,w_h;v_h,w_h)=l_h(v_h,q_h)\text{ para todo } (v_h,q_h)\in W_h^{(k)}
+	\label{eqn:problemaph}
+\end{equation}
+donde $\kappa_h:\Omega^\Gamma \to\mathbb{R}$ es una aproximación de la curvatura de $\Gamma$.
+\subsection{Existencia y unicidad de solución para el problema discreto}
+En los resultados expuestos a continuación $\|\cdot\|_{k,D}$ denota la norma de $H^k(D)$ y $|\cdot|_{k,D}$ la respectiva seminorma. Además según  \citep{lozinski2019cutfem,duprez2020phi,duprez2022varphi} se establecen las siguientes premisas para el análisis teórico del método propuesto para resolver la ecuación \ref{eqn:phifemdual}.
+\begin{premisa}
+	Existe un dominio $\Omega^\Gamma$, vecindad de $\Gamma$   que puede ser cubierto por conjuntos abiertos $\mathcal{O}_i$, $i=1,\ldots,I$ y se puede introducir en cada $\mathcal{O}_i$ coordenadas locales $\xi_1$,\ldots, $\xi_d$ con $\xi_d=\phi$ tales que $\frac{\partial \xi}{\partial x^\alpha}$ y $\frac{\partial x}{\partial \xi^\alpha}$ hasta el orden $k+1$ están acotadas por algún $C_0>0$. Además $|\nabla \phi|\geq m$ en $\Omega_h^\Gamma$ para algún $m>0$
+\end{premisa}
+\begin{premisa}
+	$\Omega_h^\Gamma\subset \Omega^\Gamma$ y $|\nabla \phi_h|\geq \frac{m}{2}$ en $\Omega_h^\Gamma$.
+\end{premisa}
+\begin{premisa}
+	La frontera aproximada $\Gamma_h$ puede ser cubierta por subregiones $\left\{ \Pi_k\right\}_{k=1,,N_\Pi} $ con las siguientes propiedades:
+	\begin{itemize}
+		\item Cada $\Pi_k$ esta compuesta de un elemento $T_k$ contenido en  $\Omega$ y algunos elementos interceptados por $\Gamma$, es decir $\Pi_k = T_k \cup \Pi_k^\Gamma$ donde $T_k\in\mathcal{T}_h \subset \overline{\Omega}$, $\Pi_k^\Gamma\subset \mathcal{T}^\Gamma_h$ y $ \Pi_k^\Gamma$ contiene a lo mas $M$ elementos.
+		\item Cada elemento en una subregión $\Pi_k$ comparte al menos un lado con otro elemento de la misma subregión. En particular, $T_k$ comparte un lado $F_k$ con un elemento en $\Pi_k^\Gamma$
+		\item $\mathcal{T}^\Gamma_h = \cup_{k=1}^{N_\Pi} \Pi_k^\Gamma$ y $\Gamma_h^i = \cup_{k=1}^{N_\Pi} F_k$
+		\item $\Pi_k$ y $\Pi_l$ son disjuntos si $k\neq l$.
+	\end{itemize}
+\end{premisa}
+\begin{figure}[H]	
+	\centering\hfil
+	\includegraphics[width=0.4\linewidth]{subregionfrontera.pdf}
+	\hfil
+	\includegraphics[width=0.4\linewidth]{subregionfronteranocontigua.pdf}
+	\caption{Izquierda: Subregión $\Pi_k$, en borde rojo, compuesta de un elemento $T_k$ en $\overline{\Omega}$ y elementos $\Pi_k^\Gamma$ que interceptan $\Gamma$, la arista $F_k$ forma parte de  $\Gamma_h^i$ la frontera de $\Omega_h\setminus\Omega_h^\Gamma$ que se muestra con lineas verdes segmentadas. Derecha: Se muestran elementos frontera que no satisfacen la Premisa 2, esto indica que la malla no está suficientemente refinada. }
+	\label{fig:dominiofrontera}
+\end{figure}
+La última premisa asegura que un elemento del dominio frontera este siempre contiguo a un elemento contenido en el dominio físico y descarta el caso mostrado en la Figura \ref{fig:dominiofrontera} donde la frontera esta ondulada y por lo tanto el ancho de subregión $\Pi_k$ es mayor que $h$. 
+
+
+Recordemos el lema visto en \cite[Lema 3.2 en p.~1013]{duprez2020phi}:
+\begin{lema}\label{lema:triangulo}
+	Sea $T$ un triangulo, $E$ uno de sus lados y $p$ un polinomio en $T$ de grado $s$, tal que $p=\frac{\partial p}{\partial n}=0$ en E y $\Delta p=0$ en $T$. Entonces $p=0$ en $T$.
+\end{lema}
+A continuación adaptamos un resultado de
+\cite[Lema 3.5 en p.~82]{lozinski2019cutfem}
+\begin{lema}\label{lema:alfa}
+	Sea $B_h$ la región entre $\Gamma_h$ y $\partial\Omega_h$. Para todo $\beta,\lambda>0$, existe $\alpha<1$ tal que para todo $v\in V_h^{(k)}$
+	\[
+	\int_{B_h} |\nabla v|^2 \leq \alpha |v|^2_{1,\Omega_h}+ \lambda h \sum_{E\in \mathcal{F}_h^\Gamma}\left\| \left[ \frac{\partial v}{\partial n}\right] \right\|^2_{0,E}+\lambda h^2 \sum_{T\in \mathcal{T}_h^\Gamma} \|\Delta v-\beta v\|^2_{0,T}+ \lambda \beta^2 h^2\|v\|^2_{0,\Omega^\Gamma_h}
+	\]
+\end{lema}	
+\begin{proof}[Prueba]
+	Dado $\lambda>0$, consideramos una descomposición de $\Omega_h^\Gamma$ en elementos $\{\Pi_k\}$ y definimos
+	\[
+	F(\Pi_k,v)=\dfrac{|v|^2_{1,\Pi_k^\Gamma} -  \lambda h \displaystyle\sum_{E\in \mathcal{F}_k}\left\| \left[ \dfrac{\partial v}{\partial n}\right] \right\|^2_{0,E}-\lambda h^2 \displaystyle\sum_{T\subset \Pi_k} \|\Delta v\|^2_{0,T}}{ |v|^2_{1,\Pi_k}}
+	\]
+	y \[
+	\alpha = \max_{\Pi_k,v\neq 0} F(\Pi_k,v)
+	\]
+	donde el subconjunto $\mathcal{F}_k \subset \mathcal{F}_h^\Gamma$ esta compuesto por los lados internos en $\Pi_k$.
+	
+	Como  $|v|_{1,\Pi_k^\Gamma}\leq  |v|^2_{1,\Pi_k}$ entonces $\alpha \leq 1$. Supongamos que $\alpha=1$ entonces existen $\Pi_k$, $v$ tales que
+	\[
+	|v|^2_{1,\Pi_k}=	|v|^2_{1,\Pi_k^\Gamma} -  \lambda h \sum_{E\in \mathcal{F}_k}\left\| \left[ \frac{\partial v}{\partial n}\right] \right\|^2_{0,E}-\lambda h^2 \sum_{T \subset\Pi_k } \|\Delta v\|^2_{0,T} 
+	\]
+	y por lo tanto
+	\[
+	|v|^2_{1,T_k}+  \lambda h \sum_{E\in \mathcal{F}_k}\left\| \left[ \frac{\partial v}{\partial n}\right] \right\|^2_{0,E}+\lambda h^2 \sum_{T  \subset\Pi_k} \|\Delta v\|^2_{0,T} =0
+	\]
+	Como $|v|^2_{1,T_k}=0$ entonces existe $c\in\mathbb{R}$, tal que $v_h=c$ en $T_k$. Aplicamos el Lema \ref{lema:triangulo} a $v-c$ de donde $v_h=c$ en $\Pi_k$ y por lo tanto 	$|v|^2_{1,\Pi_k}=0$. Asi $\alpha<1$	y
+	\[
+	|v|^2_{1,\Pi_k^\Gamma}\leq \alpha	|v|^2_{1,\Pi_k} +  \beta h \sum_{E\in \mathcal{F}_k}\left\| \left[ \frac{\partial v}{\partial n}\right] \right\|^2_{0,E} + \beta h^2 \sum_{T \subset\Pi_k } \|\Delta v\|^2_{0,T} 
+	\]
+	sumando respecto de las subregiones $\Pi_k$ y como $B_h\subset \Omega_h^\Gamma$ entonces
+	\[
+	\int_{B_h} |\nabla v|^2 \leq \alpha |v|^2_{1,\Omega_h}+ \beta h \sum_{E\in \mathcal{F}_h^\Gamma}\left\| \left[ \frac{\partial v}{\partial n}\right] \right\|^2_{0,E}+\beta h^2 \sum_{T\in \mathcal{T}_h^\Gamma} \|\Delta v\|^2_{0,T}
+	\]
+	por ultimo aplicamos la desigualdad triangular en cada elemento $T$, $\|\Delta v\|^2_{0,T}\leq \|\Delta v-\beta v\|^2_{0,T}+\|\beta v\|^2_{0,T}$.
+\end{proof}	
+Consideremos las siguientes desigualdades adaptadas de 
+\cite[Lema 3.1 y Lema 3.4]{lozinski2019cutfem}
+%\begin{lema}[\protect{\citep[Lema 3.1]{lozinski2019cutfem}}]
+\begin{lema}
+	\label{lema:trazaraiz}
+	Para toda función $v\in H^1(\Omega_h^\Gamma)$ 
+	\[
+	\|v\|^2_{0,\Omega^\Gamma_h}
+	\leq C \left( h\|v\|^2_{0,\Gamma_h} + h^2 |v|^2_{1,\Omega^\Gamma_h}\right)
+	\]
+\end{lema}
+%\begin{lema}[\protect{\cite[Lema 3.4]{lozinski2019cutfem}}]
+\begin{lema}
+	\label{lema:traza}
+	Para toda función $v\in H^1(\Omega_h^\Gamma)$ 
+	\[
+	\sum_{E\in\mathcal{F}_h^\Gamma} \|v\|^2_{0,E} \leq C \left( \frac{1}{h}\|v\|^2_{0,\Omega_h^\Gamma} + h |v|^2_{1,\Omega^\Gamma_h}\right)
+	\]  y
+	\[
+	\|v\|^2_{0,\partial\Omega_h} \leq C \left( \|v\|^2_{0,\Gamma_h} + h\|v\|^2_{1,\Omega^\Gamma_h}\right)
+	\]
+\end{lema}
+Según el siguiente lema visto en 
+\cite[Lema 3.5]{duprez2022varphi}, \cite[Lema 1.46]{di2011mathematical}.
+\begin{lema}[Desigualdad de la traza discreta]\label{lema:trazaq}
+	Para toda función $v_h$ polinomial a trozos en $\mathcal{T}_h^\Gamma$, \[\|v_h\|_{0,\Gamma_h} \leq \frac{C}{\sqrt{h}} \|v_h\|_{0,\Omega^\Gamma_h}\]
+	con constante $C>0$ dependiendo del máximo grado de los polinomios en $v_h$ y de las constantes dadas en las Premisas 1-2.
+\end{lema}	
+
+%\begin{lema}[Desigualdad de la traza discreta \cite[Lema 1.46]{di2011mathematical}] 
+%c
+%\end{lema}	
+%\begin{lema}
+%	Sea $B_h$ la región entre $\Gamma_h$ y $\partial\Omega_h$, 
+%	$B_h=\{\phi>0\}\cap\Omega_h$
+%\end{lema}
+\begin{prop} Si $\gamma$ y $\sigma$ son suficientemente grandes, existe $M>0$ tal que
+	\[
+	\begin{aligned}
+		a_h(v,q;v,q) \geq M \left(|v|^2_{1,\Omega_h}		
+		+ 	 \frac{1}{h^2}\|v-\frac{1}{h}\phi_h q\|^2_{0,\Omega^\Gamma_h} +
+		h \sum_{E\in \mathcal{F}_h^\Gamma} \left\| \left[ \frac{\partial v}{\partial n} \right]\right \|^2_{0,E}+
+		h^2 \sum_{T\in \mathcal{T}_h^\Gamma}  \|\Delta  v\|^2_{0,T}
+		\right)
+	\end{aligned}
+	\]
+\end{prop}
+\begin{proof}[Prueba]
+	Sea $v_h\in V_h^{(k)}$ y $B_h =\{\phi_h>0\}\cap\Omega_h$ con $\partial B_h=\partial\Omega_h \cup \Gamma_h$. Entonces procedemos a expresar la integral de linea sobre la frontera del dominio ficticio como una  integral sobre $B_h$ y los saltos del gradiente en las aristas de los elementos del dominio frontera, como se ilustra a continuación:
+	
+	%\[
+	%\begin{aligned}
+	%	\int_{\partial \Omega_h} (\nabla u\cdot n) v
+	%	&=\int_{\partial \Omega_h} (\nabla u\cdot n) v-
+	%	\int_{\Gamma_h} \frac{1}{|\nabla \phi|}(\nabla u\cdot n) v 
+	%	+\int_{\Gamma_h} \frac{1}{|\nabla \phi|}(\nabla u\cdot n - \frac{1}{h}q\phi) v \\
+	%	&=\int_{B_h} (v \Delta u + \nabla u\cdot \nabla v) 
+	%	+\int_{\Gamma_h} \frac{1}{|\nabla \phi|}(\nabla u\cdot \nabla \phi - \frac{1}{h}q\phi) v 
+	%\end{aligned}
+	%\]
+	\begin{figure}[H]
+		%	\includegraphics[valign = c, width = .3\linewidth]{bilinealbh.pdf}
+		\centering
+		\includegraphics[width = .4\linewidth]{bilinealbh.pdf}
+		\caption{Descomposición de la integral de linea sobre $\partial \Omega_h$ en función de las aristas de los elementos del dominio frontera.}
+	\end{figure}
+	\[
+	\begin{aligned}
+		\int_{\partial \Omega_h} \frac{\partial u}{\partial n} v
+		&=\int_{\partial B_h} \frac{\partial u}{\partial n} v+
+		\int_{\Gamma_h} \frac{\partial u}{\partial n} v \\
+		&= \sum_{T\in \mathcal{T}_h^\Gamma} \int_{\partial (B_h \cap T)} \frac{\partial u}{\partial n} v - \sum_{E\in \mathcal{F}_h^\Gamma}\int_{B_h \cap E} \left[\frac{\partial u}{\partial n} 
+		\right]v+	\int_{\Gamma_h} \frac{\partial u}{\partial n} v \\
+		&=\int_{B_h} (v \Delta u + \nabla u\cdot \nabla v) 
+		- \sum_{E\in \mathcal{F}_h^\Gamma}\int_{B_h \cap E} \left[\frac{\partial u}{\partial n} 
+		\right]v+
+		\int_{\Gamma_h} \frac{\partial u}{\partial n} v 
+	\end{aligned}
+	\]
+	%\[
+	%\begin{aligned}
+	%	\int_{\partial \Omega_h} (\nabla u\cdot n) v
+	%	&=\int_{\Omega_h} (v \Delta u + \nabla u\cdot \nabla v) \\
+	%	& =\int_{\Omega^\Gamma_h} (v \Delta u + \nabla u\cdot \nabla v)+\int_{\Omega^i_h} (v \Delta u + \nabla u\cdot \nabla v) 
+	%\end{aligned}
+	%\]
+	luego
+	\[
+	\begin{aligned}	
+		a_h(u,p;v,q)&=\int_{\Omega_h} \nabla u\cdot \nabla v +\int_{\Omega_h} \beta uv - 
+		\int_{B_h} (v \Delta u + \nabla u\cdot \nabla v) 
+		-\int_{\Gamma_h} \frac{\partial u}{\partial n} v 
+		\\
+		&+ \sum_{E\in \mathcal{F}_h^\Gamma}\int_{B_h \cap E} \left[\frac{\partial u}{\partial n} 
+		\right]v + \frac{\gamma}{h^2}\int_{\Omega^\Gamma_h} (u-\frac{1}{h}\phi p)(v-\frac{1}{h}\phi q) +G_h(u,v)+J_h^{lhs}(u,v)
+	\end{aligned}
+	\]
+	y
+	\[
+	\begin{aligned}	
+		a_h(v,q;v,q)&=\int_{\Omega_h} |\nabla v |^2 +\int_{\Omega_h} \beta |v |^2 - 
+		\int_{B_h} v \Delta v -\int_{B_h} |\nabla v|^2
+		-	\int_{\Gamma_h} v\frac{\partial v}{\partial n}  
+		\\
+		&+ \sum_{E\in \mathcal{F}_h^\Gamma}\int_{B_h \cap E} \left[\frac{\partial v}{\partial n} 
+		\right]v+ \frac{\gamma}{h^2}\int_{\Omega^\Gamma_h} (v-\frac{1}{h}\phi q)^2	+G_h(v,v)+J_h^{lhs}(v,v)
+	\end{aligned}
+	\]
+	por el Lema \ref{lema:trazaq}
+	\[
+	\begin{aligned}
+		-\int_{\Gamma_h} v\frac{\partial v}{\partial n} & \geq - \|v\|_{0,\Gamma_h}\|\nabla v \cdot n\|_{0,\Gamma_h}
+		\geq - \frac{C^2}{h}\|v-\frac{1}{h}\phi q\|_{0,\Omega^\Gamma_h}\|\nabla v \|_{0,\Omega^\Gamma_h}\\
+		& \geq -\frac{1}{2}\left(
+		\frac{C^3}{\epsilon h^2}\|v-\frac{1}{h}\phi q\|^2_{0,\Omega^\Gamma_h} + \epsilon C | v |^2_{1,\Omega^\Gamma_h}
+		\right)
+	\end{aligned}
+	\]
+	%Del Lema \ref{lema:traza}:
+	%\[
+	%\begin{aligned}
+	%\left|
+	%\int_{\Gamma_h} \frac{1}{|\nabla \phi|}(\nabla v\cdot \nabla \phi - \frac{1}{h}q\phi) v \right|
+	%&\leq \frac{C}{h} \|\nabla v\cdot \nabla \phi - \frac{1}{h}q\phi \|_{0,\Omega_h^\Gamma}\| v\|_{0,\Omega_h^\Gamma} \\
+	%&\leq \frac{1}{2} \left( \frac{  C^2}{\epsilon h^2}\|\nabla v\cdot \nabla \phi - \frac{1}{h}q\phi \|^2_{0,\Omega_h^\Gamma} +\epsilon\| v\|^2_{0,\Omega_h^\Gamma}\right)\quad \text{(Desigualdad de Young)}
+	%\end{aligned}
+	%\]
+	\[
+	\sum_{E\in \mathcal{F}_h^\Gamma}\int_{B_h \cap E} \left[\frac{\partial v}{\partial n} 
+	\right]v \geq 
+	-\frac{1}{2} \left( \frac{\epsilon}{h} \sum_{E\in \mathcal{F}_h^\Gamma} \|v\|^2_{0,E} + \frac{h}{\epsilon }
+	\sum_{E\in \mathcal{F}_h^\Gamma}\left \| \left[\frac{\partial v}{\partial n} 
+	\right] \right \|^2_{0,E} 
+	\right)\quad \text{(Desigualdad de Young)}
+	\]
+	del Lema \ref{lema:traza}:
+	\[
+	-\frac{\epsilon}{h}\sum_{E\in\mathcal{F}_h^\Gamma} \|v\|^2_{0,E} \geq -\frac{\epsilon C}{h} \left( \frac{1}{h}\|v\|^2_{0,\Omega_h^\Gamma} + h |v|^2_{1,\Omega^\Gamma_h}\right)
+	\] 
+	Como $B_h\subset \Omega_h^\Gamma$
+	\[
+	\begin{aligned}
+	\left|	\int_{B_h} \beta v^2 -	\int_{B_h} v \Delta v
+	\right|\leq  \|  v \|_{0,\Omega_h^\Gamma}
+	\|\Delta v -\beta v\|_{0,\Omega_h^\Gamma}\leq 
+	\frac{1}{2} \left( \frac{\epsilon C}{h^2}  \|  v \|^2_{0,\Omega_h^\Gamma} + \frac{h^2}{\epsilon C }
+	\|\Delta v -\beta v \|^2_{0,\Omega_h^\Gamma}
+	\right)\\
+	\text{(Desigualdad de Young)}			
+	\end{aligned}
+	\]
+	del Lema \ref{lema:alfa}
+	\[
+	\int_{B_h} |\nabla v|^2 \leq \alpha |v|^2_{1,\Omega_h}+ \lambda h \sum_{E\in \mathcal{F}_h^\Gamma}\left\| \left[ \frac{\partial v}{\partial n}\right] \right\|^2_{0,E}+\lambda h^2 \sum_{T\in \mathcal{T}_h^\Gamma} \|\Delta v-\beta v\|^2_{0,T}+ \lambda \beta^2 h^2\|v\|^2_{0,\Omega^\Gamma_h}
+	\]
+	
+	por el Lema \ref{lema:trazaq} y como $v=v-\frac{1}{h}\phi q$ en $\Gamma_h$
+	\[
+	-\|v_h\|^2_{0,\Gamma_h} \geq - \frac{C^2}{h} \|v_h-\frac{1}{h}\phi q\|_{0,\Omega^\Gamma_h}\]
+	luego
+	\[
+	\begin{aligned}	
+		a_h(v,q;v,q)&\geq \int_{\Omega_h} |\nabla v |^2 + \int_{\Omega^i_h} \beta|v|^2 -
+		\frac{1}{2} \left(\frac{ \epsilon C }{h^2} \|  v \|^2_{0,\Omega_h^\Gamma} + \frac{h^2}{\epsilon C}
+		\|\Delta v-\beta v \|^2_{0,\Omega_h^\Gamma}
+		\right)	\\	
+		&-\alpha |v|^2_{1,\Omega_h} - \lambda h \sum_{E\in \mathcal{F}_h^\Gamma}\left\| \left[ \frac{\partial v}{\partial n}\right] \right\|^2_{0,E} -\lambda h^2 \sum_{T\in \mathcal{T}_h^\Gamma} \|\Delta v-\beta v\|^2_{0,T} - \lambda\beta^2 h^2 \|v\|^2_{0,\Omega_h^\Gamma}\\
+		&
+		-\frac{1}{2} \left( \frac{\epsilon}{h} \sum_{E\in \mathcal{F}_h^\Gamma} \|v\|^2_{0,E} + \frac{h}{\epsilon }
+		\sum_{E\in \mathcal{F}_h^\Gamma}\left \| \left[\frac{\partial v}{\partial n} 
+		\right] \right \|^2_{0,E} 
+		\right)
+		+ \frac{\gamma}{h^2}\int_{\Omega^\Gamma_h} (v-\frac{1}{h}\phi q)^2
+		\\
+		&	+		 \sigma h \sum_{E\in \mathcal{F}_h^\Gamma} \left\| \left[ \frac{\partial v}{\partial n} \right]\right \|^2_{0,E}+
+		\sigma h^2 \sum_{T\in \mathcal{T}_h^\Gamma}  \|\Delta  v-\beta v\|^2_{0,T} -\frac{1}{2}\left(
+		\frac{C^3}{\epsilon h^2}\|v-\frac{1}{h}\phi q\|^2_{0,\Omega^\Gamma_h} + \epsilon C| v |^2_{1,\Omega^\Gamma_h}
+		\right)\\
+		& \geq (1-\alpha- \epsilon C ) |v|^2_{1,\Omega_h}
+		- \frac{\epsilon C}{h^2}   \|v\|^2_{0,\Omega_h^\Gamma}
+		+ 	 \frac{\gamma-\frac{C^3}{2\epsilon }      }{h^2}\|v-\frac{1}{h}\phi q\|^2_{0,\Omega^\Gamma_h} \\
+		& +		 (\sigma-\lambda-\frac{1}{2\epsilon}) h \sum_{E\in \mathcal{F}_h^\Gamma} \left\| \left[ \frac{\partial v}{\partial n} \right]\right \|^2_{0,E}+
+		h^2(\sigma-\lambda-\frac{1}{2\epsilon C})  \sum_{T\in \mathcal{T}_h^\Gamma}  \|\Delta  v-\beta v\|^2_{0,T} \\
+		& \geq (1-\alpha- 2\epsilon C ) |v|^2_{1,\Omega_h}		
+		+ 	 \frac{\gamma- C^3 (\epsilon +\frac{1}{2\epsilon} ) }{h^2}\|v-\frac{1}{h}\phi q\|^2_{0,\Omega^\Gamma_h} \\
+		& +		 (\sigma-\lambda-\frac{1}{2\epsilon}) h \sum_{E\in \mathcal{F}_h^\Gamma} \left\| \left[ \frac{\partial v}{\partial n} \right]\right \|^2_{0,E}+
+		h^2(\sigma-\lambda-\frac{1}{2\epsilon C})  \sum_{T\in \mathcal{T}_h^\Gamma}  \|\Delta  v-\beta v\|^2_{0,T} 
+	\end{aligned}
+	\]
+	donde $0<h\leq h_0:={\rm diam}(\Omega)$
+	
+	Si elegimos $0<\epsilon<\frac{1-\alpha}{2C}$, $\gamma> C^3 (\epsilon +\frac{1}{2\epsilon} )$, $\sigma_D > \max\left\{\lambda +\frac{1}{2\epsilon},
+	\lambda +\frac{1}{2\epsilon C}\right\}$ entonces encontramos $M>0$ como
+	\[
+	M=\min\left\{1-\alpha-2\epsilon C,
+	\gamma - C^3 (\epsilon +\frac{1}{2\epsilon} ),\sigma_D-\beta-\frac{1}{2\epsilon},\sigma_D-\beta-\frac{1}{2\epsilon C}
+	\right\}\]
+\end{proof}
+\begin{teo}
+	Las ecuaciones \ref{eqn:problemach},  para la concentración de nutrientes $c_h$,  y \ref{eqn:problemaph} para la presión intracelular $p_h$  tienen solución única. 
+\end{teo}
+\begin{proof}[Prueba]
+	Si definimos \[\vertiii{v,q}_h=\left(|v|^2_{1,\Omega_h}				+ 	 \dfrac{1}{h^2}\|v-\dfrac{1}{h}\phi_h q\|^2_{0,\Omega^\Gamma_h} +
+	h \sum_{E\in \mathcal{F}_h^\Gamma} \left\| \left[ \dfrac{\partial v}{\partial n} \right]\right \|^2_{0,E}+
+	h^2 \sum_{T\in \mathcal{T}_h^\Gamma}  \|\Delta  v\|^2_{0,T}
+	\right)\] entonces $\vertiii{\cdot}$ es una norma para $W_h^{(k)}$, pues si $\vertiii{v,q}_h=0$ entonces $v_x=v_y=0$ en $\Omega_h$ es decir $v$ es constante en todo $\Omega_h$ y como $v=\dfrac{1}{h}\phi_h$ entonces $v=0$ en $\Gamma_h$, y por lo tanto $v=0$ en $\Omega_h$. De igual modo $\|v-\dfrac{1}{h}\phi_h q\|^2_{0,\Omega^\Gamma_h}=0$ implica que $\phi_h q=0$ y al ser $q$ continua entonces $q=0$ en $\Omega^\Gamma_h$. Por lo tanto la única solución del problema homogéneo  $a_h(v,q;v,q)=0$ es la trivial, y al ser $W^{(k)}_h$ de dimensión finita el problema $a_h(v,q;v,q)=l_h(v_h,q_h)$  tendrá solución única.
+\end{proof}
+
+% Sea $T$ un triángulo y $E$ uno de sus lados, por el teorema de la traza $\|v\|^2_{0,E}\leq C\|v\|^2_{1,T}$
+%Recordamos la desigualdad de la traza en \cite{riviere2005analysis} escalada: Existe una constante $C$ independiente de $h$ tal que
+% \[
+% \|v\|^2_{0,E}\leq C\left( \frac{1}{h}\|v\|^2_{0,T}+h| v|^2_{1,T}
+% \right)
+% \]
+% luego 
+%Recordemos el lema visto en \cite[Teorema 33.2 en p.~127]{duprez2020phi}: $\int_{\Gamma_h} |v|\leq $
+%
+%	\begin{tabular}{ccccc}
+	%		$h$ & $\|u_h-u_{ex}\|_{L^2}$ & orden & $\|u_h-u_{ex}\|_{H^1}$ & order \\
+	%		 \toprule 
+	%		 
+	%	\end{tabular}		
+
+
+%Si suponemos que $f\in H^k(\Omega )$ entonces la solución de **** pertenece a $H^{k+2}(\Omega)$ y puede ser extendida por una función $u^*$ en  $H^{k+2}(\Omega)$ \cite[p. 268]{evans2010partial} y
+
+
+\section{Extensión de la velocidad}
+Para poder resolver la ecuación \ref{eqn:evolucionconjuntodenivel} de evolución de la frontera libre  es preciso encontrar una función $S=(S_1,S_2)$ que extienda la velocidad $V=(v_1,v_2)$ definida solo en la frontera del tumor $\Gamma_h$. El método \ref{eqn:phifemdual} aplicado a la presión y a la concentración de nutrientes permite obtener una aproximación de la velocidad de crecimiento del tumor en la región $\Omega_h^\Gamma$ y no solamente en la frontera $\Gamma_h$.
+
+Si $A=\begin{bmatrix} \phi_x^2 &  \phi_{x}\phi_{y} \\ \phi_{x}\phi_{y} & \phi_y^2 \end{bmatrix}$, entonces $S_i$ es solución del problema elíptico:
+\begin{equation}
+	\begin{aligned}
+		\nabla \cdot (A \nabla u)=0 & \text{ en }  \mathcal{O}\setminus \Gamma \\
+		(A \nabla u) \cdot n=0 &	 \text{ en }  \partial \mathcal{O}\\
+		u=v_i &	 \text{ en } \Gamma
+	\end{aligned}
+	\label{eqn:problemaextension}
+\end{equation}
+Sin embargo a menos que $A$ sea definida positiva no podemos asegurar unicidad de la solución y ya que deseamos obtener una extensión de la velocidad suficientemente suave en todo $\mathcal{O}$, por lo que es necesario incluir un término de viscosidad artificial para $\epsilon$ pequeño:
+\begin{equation}
+	\begin{aligned}
+		\nabla \cdot ((A+\epsilon I) \nabla u)=0 & \text{ en }  \mathcal{O}\setminus \Gamma \\
+		((A+\epsilon I) \nabla u) \cdot n=0 &	 \text{ en }  \partial \mathcal{O}\\
+		u=v_i &	 \text{ en } \Gamma
+	\end{aligned}
+\end{equation}
+Para encontrar $S_h=(S_{h,1},S_{h,2})$, una aproximación numérica de la extensión de la velocidad se define el siguiente espacio de elementos finitos sobre $\mathcal{O}$: 
+\[
+M_h= \left\{
+v \in H^1(\mathcal{O}):\left.v\right\vert_T \in \mathbb{P}_k(T),\forall T \in \mathcal{T}^\mathcal{O}_h
+\right\}
+\]
+de modo que el problema a resolver es el siguiente:
+
+Encontrar $S_{h,i} \in M_{h},p_h\in Q^k_h$:
+\begin{equation}
+	\begin{aligned}
+		\int_\mathcal{O} ((A+\epsilon I) \nabla S_{h,i})\cdot\nabla v_h +  \frac{\gamma}{h^2}  \int_{\Omega_h^\Gamma} (S_{h,i}-\frac{1}{h}\phi_h p_{h}) (v_{h}-\frac{1}{h}\phi_h q_{h})&=
+		\frac{\gamma}{h^2}  \int_{\Omega_h^\Gamma} v_i(v_{h}-\frac{1}{h}\phi_h q_{h})\\
+		&\forall v_{h} \in M_{h},q_h\in Q^k_h
+	\end{aligned}
+	\label{eqn:problemaSh}
+\end{equation}
+\begin{prop}
+	El problema de extensión de la velocidad dado por la ecuación \ref{eqn:problemaSh} tiene solución única.	
+	\label{prop:extension}
+\end{prop}
+\begin{proof}[Prueba]
+	Como
+	\[
+	(x,y)^T(A+\epsilon I)(x,y)=(x\phi_x+y\phi_y)^2+\epsilon(x^2+y^2)
+	\geqslant \epsilon(x^2+y^2)
+	\]
+	entonces para $v_i=0$ tenemos que
+	\[
+	0\leqslant 	\epsilon|v_h|^2_{1,\mathcal{O}} +  
+	\frac{\gamma}{h^2} \|v_{h}-\frac{1}{h}\phi_h p_{h}\|^2_{0,\Omega_h^\Gamma}  
+	\leqslant 	\int_\mathcal{O} ((A+\epsilon I) \nabla v_{h})\cdot\nabla v_h+
+	\frac{\gamma}{h^2}  \int_{\Omega_h^\Gamma}  (v_{h}-\frac{1}{h}\phi_h p_{h})^2 =0
+	\]
+	por lo tanto $\partial_x v_h=0$ y $\partial_y v_h=0$, esto implica que $v_h=c$ es constante en $\mathcal{O}$ y como además $v_h=0$ en $\Gamma_h$  obtenemos que $v_h=0$ y $p_h=0$. Como la única solución del problema homogéneo asociado a la ecuación \ref{eqn:problemaSh} es la trivial y tanto $M_{h}$ como $Q^k_h$ son de dimensión finita podemos concluir la existencia y unicidad del problema de extensión de la velocidad.
+\end{proof}
+\comentario{
+	\[
+	\begin{aligned}
+		-\Delta u =0&\text{ en }\Omega \\
+		u=g_D &\text{ en }\Gamma \\
+		\left[\frac{\partial u}{\partial n}\right] = 0&\text{ en }\Gamma\\
+		\frac{\partial u}{\partial n} = g_N &\text{ en } \partial\Omega \\
+	\end{aligned}
+	\]
+	\[
+	\int_{\Omega_{h,1}} \nabla u \cdot \nabla u - \int_{\partial \Omega_{h,1}}v \nabla u\cdot n =0
+	\]
+	\[
+	u_1 = g +p_1\phi ,\quad u_2 = g  +p_2\phi 
+	\]
+	\[
+	y_1 + \nabla u_1=0,\quad y_2 + \nabla u_2=0
+	\]
+	\[
+	y_1\nabla \phi -y_2\nabla \phi =0,\text{ en }\Omega_h^\Gamma
+	\]
+	\[
+	Z_h = \left\{z:\Omega_h^\Gamma \to\mathbb{R}^2: z|_T \in \mathbb{P}^k(T) \times \mathbb{P}^k(T), \forall T \in \Omega_h^\Gamma  \right\}
+	\]
+	Encontrar $u_{h,i} \in V_{h,i},p_h\in Q^k_h, 	y_{h,i} \in Z_h$:
+	\[
+	\begin{aligned}
+		\sum_{i=1}^{2}\int_{\Omega_{h,i}} \nabla u_{h,i} \cdot \nabla v_{h,i} &+ 	\sum_{i=1}^{2}\int_{\partial \Omega_{h,i}}v_{h,i} (y_{h,i}\cdot n )\\
+		& +\frac{\gamma_p}{h^2} \sum_{i=1}^{2} \int_{\Omega_h^\Gamma} (u_{h,i}-\frac{1}{h}\phi_h p_{h,i}) (v_{h,i}-\frac{1}{h}\phi_h q_{h,i})
+		\\
+		& +\gamma_u \sum_{i=1}^{2}\int_{\Omega_h^\Gamma} 
+		(y_{h,i} + \nabla u_{h,i})\cdot 
+		(z_{h,i} + \nabla v_{h,i})
+		\\
+		& +\frac{\gamma_y}{h^2} \int_{\Omega_h^\Gamma} 
+		(y_{h,1}\cdot \nabla \phi_{h}-
+		y_{h,2}\cdot \nabla \phi_{h})(z_{h,1}\cdot \nabla \phi_{h}-
+		z_{h,2}\cdot \nabla \phi_{h})
+		\\
+		& +  \sum_{i=1}^{2} \left( G_h(u_{h,i},v_{h,i})+ J_h^{lhs}(y_{h,i},z_{h,i}) \right)\\
+		&	=\sum_{i=1}^{2} \int_{\Omega_{h,i}} fv_{h,i} + \frac{\gamma_p}{h^2}  \sum_{i=1}^{2} \int_{\Omega_h^\Gamma} g_h (v_{h,i}-\frac{1}{h}\phi_h q_{h,i})+\sum_{i=1}^{2}J_h^{rhs}(z_{h,i}),\\
+		&\forall v_{h,i} \in V_{h,i},q_h\in Q^k_h, 	z_{h,i} \in Z_h
+	\end{aligned}
+	\]
+	donde 
+	\[
+	J_h^{lhs}(y,z) = \gamma_{div} \int_{\Omega_h^\Gamma} (\nabla \cdot y)(\nabla \cdot z),\qquad
+	J_h^{rhs}(z) = \gamma_{div} \int_{\Omega_h^\Gamma} (\nabla \cdot z)f
+	\]
+}
+\comentario{
+	\section{Evolución de la frontera libre}
+	La ecuación que rige el crecimiento del tumor en la frontera libre es
+	\[
+	\frac{\partial \phi}{ \partial t} + V_n \|\nabla \phi(x(t),y(t))\|=0,\forall t>0
+	\]
+	donde $(x(t),y(t))\in \Gamma, \forall t>0$, y $V_n$ es la velocidad de crecimiento en la dirección normal a la frontera. 
+	
+	Escogiendo $a(x,y,t)$  tal que $a(x,y,t)=V_n n, \forall (x(t),y(t))\in \Gamma$ plantemos la siguiente ecuación de advección.
+	
+	\begin{equation}
+		\label{eqn:phi}
+		\frac{\partial \phi}{ \partial t} + a \cdot \nabla \phi =0
+	\end{equation}
+	podemos discretizar \eqref{eqn:phi} con el método de curvas características, $X(s,t_{n},x)$ tal que para $x$ y $t_{n+1}$ fijos, satisfacen la siguiente ecuación diferencial:
+	\begin{equation}
+		\frac{d}{ds}X(s,t_{n+1},x)=a(s,X(s,t_{n+1},x)),s\in]t_n,t_{n+1}[,
+		X(t_{n+1},t_{n+1},x)=x.
+		\label{eqn:caracteristicas}
+	\end{equation}
+	y por lo tanto
+	\[
+	0=\frac{d}{ds} \phi(s,X(s,t_{n+1},x))\approx
+	\frac{\phi(t_{n+1},X(t_{n+1},t_{n+1},x))-\phi(t_{n},X(t_{n},t_{n+1},x)) }{t_{n+1}-t_{n}}
+	\]
+	luego
+	\[
+	\phi(t_{n+1},x)=\phi(t_{n},X(t_{n},t_{n+1},x))
+	\]
+	De la ecuación \ref{eqn:caracteristicas}  podemos expresar
+	\[
+	X(t_{n},t_{n+1},x)=x-
+	\int_{t_{n}}^{t_{n+1}}	a(s,X(s,t_{n+1},x))\, ds
+	\]
+	por lo tanto si aplicamos una aproximación por integración numérica
+	\[
+	\phi(t_{n+1},x)=\phi(t_{n},x-\Delta t a(t_{n+1},x))
+	\]
+	\cite{gross2011numerical}
+	\[
+	X(t_{n},t_{n+1},x)=x-\Delta t a(t_n,x)
+	\]
+}
+\section{Aproximación de la curvatura}
+
+La normal a la frontera del tumor, $n_\Gamma$ está definida por medio de:
+\[
+n_\Gamma = \frac{\nabla \phi}{\|\nabla \phi \|}
+\]
+y puede ser aproximada en el espacio $X_h=\{v\in [C^0(\mathcal{O})]^2: v|_K\in [\mathbb{P}_1(K)]^2,\forall K\in \mathcal{T}_h\}$ resolviendo el siguiente problema: 
+
+Encuentre $N_h\in \mathcal{X}_h$ tal que 
+\begin{equation}
+	\left( N_h ,v \right)_{\mathcal{O}}=
+	\left( \frac{\nabla \phi}{\|\nabla \phi \|} ,v \right)_{\mathcal{O}},\forall v	\in \mathcal{X}_h
+\end{equation}
+
+Es necesario además encontrar $\kappa_h$ una aproximación de la curvatura definida sobre $\Omega_h^\Gamma$ de modo que sirva para el cálculo de la presión intracelular $p_h$ (\ref{eqn:problemaph}). La aproximación $\kappa_h$ esta compuesta por polinomios de grado 1 en cada triangulo $T$:  $\kappa_h = \sum_{i\in I} k_iN_i$ donde $I$ representa los vértices de los triángulos que interceptan $\Gamma_h$ o son vecinos de estos, como se muestra en la Figura \ref{fig:metodocurvatura}.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.4\linewidth]{metodocurvatura.png}
+	\caption{Región cercana a $\Omega_h^\Gamma$ donde buscamos una aproximación $\kappa_h$ para la curvatura de $\Gamma_h$}.
+	\label{fig:metodocurvatura}
+\end{figure}
+Si $D=\bigcup_{j=1}^6 T_j$ y $N_0\in \left\{ v\in C(D):\left.v\right\vert_T \in \mathbb{P}_1(T),\forall T \in D \right\}$ tal que $N_0(p_0)=1$ y $\left.N_0\right\vert_{\partial D}=0$ entonces
+\[
+\int_D\kappa_h N_0=\int_D N_0\nabla\cdot 	\left( \dfrac{\nabla \phi}{\|\nabla \phi \|}\right)
+= -\int_D  	\left( \dfrac{\nabla N_0\cdot\nabla \phi}{\|\nabla \phi \|}\right)
+\] de modo que el valor promedio de la curvatura es 
+\begin{equation}
+	\kappa_h(p_0) =-\frac{\dint_D  	\left( \dfrac{\nabla N_0\cdot\nabla \phi}{\|\nabla \phi \|}\right)}{\dint_D N_0}
+	\label{eqn:curvaturaaproximacion}
+\end{equation}
+\begin{prop}[{\cite[p.~36]{shopple2009interface}}]
+	Sea $\phi:\mathbb{R}^2\to \mathbb{R}$ y $p_0=(x_0,y_0)\in:\mathbb{R}^2$, $D=[x_0-h,x_0+h]\times [y_0-h,y_0+h]$ una región rectangular sobre la que se define una triangulación uniforme, es decir los vértices de los elementos están dados por $(x_0+ih,y_0+jh)$ para $i=-1,0,1$, $j=-1,0,1$. Si $N_0\in \left\{ v\in C(D):\left.v\right\vert_T \in \mathbb{P}_1(T),\forall T \in D \right\}$ tal que $N_0(p_0)=1$ y $\left.N_0\right\vert_{\partial D}=0$ y 
+	\[
+	\kappa_0 =-\left. \dint_D  	\left( \dfrac{\nabla N_0\cdot\nabla \phi}{\|\nabla \phi \|}\right)  \bigg/ \dint_D N_0 \right.\]
+	entonces $\kappa_0$ aproxima la curvatura  de  $\Gamma=\{(x,y):\phi(x,y)=\phi(x_0,y_0)\}$ en el punto $p_0$ en el sentido de que
+	\[
+	\kappa_0 = \nabla\cdot 	\left( \dfrac{\nabla \phi}{\|\nabla \phi \|}\right) + O(h^2)\quad\text{y}\quad
+	|\kappa_0 |\leqslant \frac{3\sqrt{2}}{h}
+	\]
+\end{prop}
+Es posible construir una aproximación  $\kappa_h$ con polinomios cuadráticos al aplicar la ecuación \ref{eqn:curvaturaaproximacion} para encontrar $k_h(p)$ en  cada vértice $p$ de un refinamiento de la triangulación de $D$, como se muestra en la Figura \ref{fig:metodocurvaturarefinado}.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.4\linewidth]{metodocurvaturarefinado.png}
+	\caption{Construcción de $\kappa_h$: Los vértices en color azul se utilizan en una aproximación por elementos de tipo $\mathbb{P}_1$ y los vértices de color naranja se utilizan en una aproximación de tipo $\mathbb{P}_2$.}
+	\label{fig:metodocurvaturarefinado}
+\end{figure}
+%\[
+%J(v)=\int_{\Omega_h^\Gamma} \left( v-\nabla \cdot \left( \dfrac{\nabla \phi}{\|\nabla \phi \|}\right)\right)^2
+%\] y planteamos  el siguiente problema de mínimos cuadrados (\cite{mourad2005assumed}, \cite{chessa2003enriched}):
+%\[
+%J(\kappa_h)=\min_{v\in Q_h^{(1)}} J(v)
+%\]
+
+\comentario{
+	Siguiendo a \citep{claus2019cutfem} y \citep{drz021}
+	aproximamos la curvatura $\kappa$ por medio de $K_h$ perteneciente al espacio  $\mathcal{B}_h=\{v\in C^0(\Omega_\Gamma): v|_K\in P_1(K),\forall K\in \mathcal{T}_h\}$  y que es solución del siguiente problema: Encuentre $K_h\in \mathcal{B}_h$ tal que 
+	
+	\begin{equation}
+		\int_{\Omega^\Gamma_h} K_h v + G_h(K_h,v) =
+		\int_{\partial\Omega^\Gamma_h} (N_h\cdot n) v
+		-
+		\int_{\Omega^\Gamma_h} N_h\cdot \nabla v
+		\quad,\forall v\in 
+		\mathcal{B}_h
+	\end{equation}
+	donde
+	\begin{equation}
+		G_h(u,v)=\sigma h\sum_{e\in \mathcal{F}_h^\Gamma} \int_e \left[ n\cdot \nabla u\right]
+		\left[ n\cdot \nabla v \right]
+	\end{equation}
+}
+\section{Método de Características de Galerkin}
+Una vez encontrada una extensión de la velocidad a todo el dominio fijo $\mathcal{O}$ podemos resolver la ecuación 	\ref{eqn:evolucionconjuntodenivel}
+\[
+\begin{aligned}	
+	\frac{\partial \phi}{\partial t} + S(x,t)\cdot \nabla \phi =0,& \quad(x,t)\in\mathcal{O}\times \left(0,T\right] \\
+	\phi(x,0)=\phi_0(x),&\quad x\in\mathcal{O}
+\end{aligned}
+\]
+El método empleado es el de Características de Galerkin, para ello se divide el intervalo $[0,T]$ en $N$ subintervalos $[t_n,t_{n+1}]$ con $\Delta t=t_{n+1}-t_n$, luego las curvas características asociadas a la ecuación de advección son la solución del problema de valor inicial
+\[
+\begin{aligned}	
+	\frac{d}{dt} X(t;x,t_{n+1})&=S(X(t;x,t_{n+1}),t),t\in [t_n,t_{n+1}] \\
+	X(t_{n+1};x,t_{n+1}) &= x
+\end{aligned}
+\]
+donde $X(t;x,t_{n+1})$ es el punto de partida de una partícula en el tiempo $t$ que llega a $x$ en el tiempo $t_{n+1}$, y
+%\[
+%X(t_n;x,t_{n+1})=x-\int_{t_n}^{t_{n+1}} %S(X(t;x,t_{n+1}),t) \,dt
+%\]
+por lo tanto a lo largo de las curvas características $\frac{d}{dt} \phi (X(t;x,t_{n+1}),t)=0$ entonces
+\begin{equation}
+	\phi (x,t_{n+1})=\phi (X(t_n;x,t_{n+1}),t_n) 
+	\label{eqn:carac1}
+\end{equation}
+Para conocer el valor de $\phi (x,t_{n+1})$ es preciso tener una aproximación de $X(t_n;x,t_{n+1})$, por ello definimos $g(t)=\phi (X(t;x,t_{n+1}),t_n)$ con $x$, $t_n$, $t_{n+1}$ fijos, luego
+\[
+g(t-k)=g(t)+(-k)g'(t)+o(k^2)
+\]
+como $g'(t)=\nabla \phi (X(t;x,t_{n+1}),t_n)\cdot X'(t;x,t_{n+1})$ entonces para $t=t_{n+1}$ y $k=t_{n+1}-t_n$:
+\[
+g(t_n)=g(t_{n+1})-\Delta t\nabla \phi (X(t_{n+1};x,t_{n+1}),t_n)\cdot X'(t_{n+1};x,t_{n+1})+o((\Delta t)^2)
+\]
+vemos que $g(t_n)=\phi (X(t_n;x,t_{n+1}),t_n)$, 
+$g(t_{n+1})=\phi (X(t_{n+1};x,t_{n+1}),t_n)=\phi (x,t_n)$, luego 
+\[
+\begin{aligned}
+	\phi (X(t_n;x,t_{n+1}),t_n) &= \phi (x,t_n)
+	-\Delta t\nabla \phi (X(t_{n+1};x,t_{n+1}),t_n)\cdot X'(t_{n+1};x,t_{n+1})+o((\Delta t)^2)\\
+	& = \phi (x,t_n)
+	-\Delta t\nabla \phi (x,t_n)\cdot X'(t_{n+1};x,t_{n+1})+o((\Delta t)^2)\\
+	&= \phi (x,t_n) 
+	-\Delta t\nabla \phi (x,t_n)\cdot 
+	S(x,t_{n+1})+o((\Delta t)^2)
+\end{aligned}
+\]
+Reemplazando en la ecuación \ref{eqn:carac1}:
+\[
+\phi (x,t_{n+1})=\phi (x,t_n) 
+-\Delta t\nabla \phi (x,t_n)\cdot 
+S(x,t_{n+1})+o((\Delta t)^2)
+\]
+también
+\[
+\phi (x-\Delta tS(x,t_{n+1}),t_{n})=
+\phi (x,t_{n}) -\Delta t\nabla \phi (x,t_n)\cdot 
+S(x,t_{n+1})+o((\Delta t)^2)
+\]
+por lo que
+\begin{equation}
+	\phi (x,t_{n+1})\approx \phi (x-\Delta tS(x,t_{n+1}),t_{n})
+	\label{eqn:nuevophih}
+\end{equation}
+viene a ser una buena aproximación de $\phi (x,t_{n+1})$.
+
+\section{Algoritmo para la evolución del crecimiento tumoral}
+El algoritmo mostrado en la Figura \ref{eqn:algoritmo} contiene los pasos necesarios para aproximar la frontera del tumor en un tiempo $t=t_{max}$ cuando el crecimiento tumoral es aproximado  por medio de una discretización uniforme del dominio $\mathcal{O}$ en elementos triangulares y la función conjunto de nivel $\phi_h$  describe la frontera inicial del tumor. 
+
+\begin{algorithm}[H]
+	\SetKwInOut{Input}{Entrada}\SetKwInOut{Output}{Salida}
+	\SetKwFor{Mientras}{Mientras}{hacer}{fin mientras}
+	\Input{$\phi_h$, $\Delta t$, $t_{max}$}
+	\Output{$p_h$, $c_h$, $\phi_h$ en tiempo $t_{max}$}
+	\BlankLine
+	$t\gets 0$.
+	
+	\Mientras{$t\leq t_{max}$}{
+		Calcular $\kappa_h$ una aproximación de la curvatura en $\Omega_h^\Gamma$ por medio de la ecuación \ref{eqn:curvaturaaproximacion}.
+		
+		Calcular la concentración de nutrientes $c_h$ por medio de  la ecuación \ref{eqn:problemach}.
+		
+		Calcular  la presión intracelular $p_h$ por medio de la ecuación \ref{eqn:problemaph}.
+		
+		Calcular $V=(v_1,v_2)$ una aproximación de la velocidad de crecimiento tumoral en  $\Omega_h^\Gamma$ por medio  de la ecuación \ref{eqn:velocidadVn}.
+		
+		Calcular  $S_h=(S_{h,1},S_{h,2})$ la extensión de la velocidad $V$	 en el dominio fijo $\mathcal{O}$ por medio de la ecuación \ref{eqn:problemaSh}.
+		
+		Calcular  $\phi_h$ en tiempo $t+\Delta t$  por medio de la ecuación \ref{eqn:nuevophih}.
+		
+		$t\gets t+\Delta t$
+	}
+	\caption{Algoritmo para la simulación numérica de la evolución del crecimiento tumoral \label{eqn:algoritmo}}	
+\end{algorithm}
+
+\comentario{
+	\section{Reinicialización de la función conjunto de nivel}
+	Dada una función de conjunto de nivel $\phi_0$, el problema de reinicialización consiste en encontrar una nueva función conjunto de nivel $\phi$ que sea una función distancia dirigida respecto a la frontera libre $\Gamma=\left\{\phi_0=0\right\}$, es decir satisface  la ecuación eikonal o icónica
+	\[
+	|\nabla \phi|-1=0
+	\]
+	El método de reinicialización elíptica propuesto por \citep{basting2013minimization} y desarrollado en los trabajos de  \citep{adams2019high} y \citep{xue2021new}, consiste en resolver el problema de minimización
+	\[
+	\min_{\tilde{\phi}\in H^1(D)} \left(  R_3( |\nabla \tilde{\phi}| )\right)
+	\]
+	en un dominio $D\subset\mathcal{O}$ que contiene al dominio frontera, $\Omega_h^\Gamma \subset D$, y
+	donde
+	\[
+	R_3( |\nabla \tilde{\phi}| ) = \int_D P_3(|\nabla \tilde{\phi}|)
+	\]
+	\[
+	P_3( |\nabla \tilde{\phi}| ) = \begin{cases}
+		\frac{1}{2}\left( |\nabla  \tilde{\phi}|-1\right)^2& ,
+		|\nabla  \tilde{\phi}|>1 \\
+		\frac{1}{3}\left( |\nabla  \tilde{\phi}|\right)^3
+		-\frac{1}{2}\left( |\nabla  \tilde{\phi}|\right)^2
+		+\frac{1}{6}& ,
+		|\nabla  \tilde{\phi}|\leq 1 \\
+	\end{cases}
+	\]
+	que conduce al siguiente problema de difusión casi lineal:
+	\begin{align}
+		\nabla \cdot \left( d_3\left(|\nabla \phi|\right)\nabla \phi \right) = 0,&\text{ en }D\\
+		\phi =0, &\text{ en }\Gamma\\
+		d_3\left(|\nabla \phi|\right)\nabla \phi \cdot n=0,&\text{ en }\partial D
+	\end{align}
+	donde el coeficiente de difusión $d_3$ esta definido como
+	\begin{equation}
+		d_3(s)=\begin{cases}
+			1-\dfrac{1}{s}&,s>1\\
+			s-1&,s\leq 1
+		\end{cases}
+	\end{equation}
+	La ecuación casi lineal de difusión es resuelta en forma aproximada mediante la siguiente linealización con parámetro de penalización $\gamma>0$ para la condición Dirichlet: Encontrar $\phi \in H^1(D)$:
+	\[
+	\int_D \nabla \phi\cdot \nabla v  + \gamma \int_\Gamma \phi v=
+	\int_D \left(1-d_3\left(|\nabla \phi|\right)\right)\nabla \phi\cdot  \nabla v,\forall v\in  H^1(D)
+	\]
+	que en el contexto del método de elementos finitos no ajustados a la frontera se aproxima como: Dados  $\phi^{n}, \phi_0\in \Phi_h$ encontrar  $\phi^{n+1}\in \Phi_h$, $p\in Q_h^{(l)}$ tal que
+	\[
+	\begin{aligned}
+		\int_D \nabla \phi^{n+1}\cdot \nabla v  &+ \frac{\gamma}{h^2} \int_{\Omega_h^\Gamma} \left( \phi^{n+1}  - \frac{\phi_{0}}{h}p \right)\left( v  - \frac{\phi_{0}}{h}q \right)\\
+		&+\sigma h \sum_{e\in \mathcal{F}_h^\Gamma} \int_e \left[ \frac{\partial \phi^{n+1}}{\partial n} \right]
+		\left[ \frac{\partial v}{\partial n} \right]\\
+		&=
+		\int_D \left(1-d_3\left(|\nabla \phi^{n}|\right)\right)\nabla \phi^{n}\cdot  \nabla v,\forall v\in  \Phi_h,\forall q\in Q_h^{(l)}
+	\end{aligned}
+	\]
+	\begin{align}
+		a_{11}(u,v)=& \int_D \nabla u\cdot \nabla v 
+		+	 \frac{\gamma}{h^2} \int_{\Omega_h^\Gamma} uv
+		+ \sigma h \sum_{e\in \mathcal{F}_h^\Gamma} \int_e \left[ \frac{\partial u}{\partial n} \right]
+		\left[ \frac{\partial v}{\partial n} \right] \\
+		a_{12}(u,q)=& - \frac{\gamma}{h^3} \int_{\Omega_h^\Gamma} \phi_0 u q\\
+		a_{21}(p,v)=&   - \frac{\gamma}{h^3} \int_{\Omega_h^\Gamma} \phi_0 pv\\
+		a_{22}(p,q)=& \frac{\gamma}{h^4} \int_{\Omega_h^\Gamma} (\phi_{0})^2pq  \\	
+		l(v)= & 
+		\int_D \left(1-d_3\left(|\nabla \phi^{n}|\right)\right)\nabla \phi^{n}\cdot  \nabla v
+	\end{align}
+	%
+	%\begin{align}
+	%	\nabla \cdot \nabla \phi  =	\nabla \cdot \left( 1-d_3\left(|\nabla \phi|\right)\nabla \phi \right) ,&\text{ en }D\\
+	%	\phi =0, &\text{ en }\Gamma\\
+	%\nabla \phi \cdot n =	\left( 1 - d_3\left(|\nabla \phi|\right)\right)\nabla \phi \cdot n,&\text{ en }\partial D\\
+	%\end{align}
+	\subsection{Medidas del error}
+	Si $\phi$ es solución del problema y $\phi_h$ es la solución del problema aproximado entonces definimos la siguientes medidas del error:
+	\[
+	\epsilon_{L^2}=\left( \int_D (\phi-\phi_h)^2 \right)^{1/2}
+	\]
+	\[
+	\epsilon_{H^1}= \left( \int_D  |\phi-\phi_h|^2+|\nabla (\phi-\phi_h)|^2 \right)^{1/2}
+	\]
+	además podemos medir si la ecuación icónica es satisfecha
+	\[
+	\epsilon_{SD}= \left({\int_D (|\nabla \phi_h|-1)^2}
+	\right)^{1/2}
+	\]
+	La medida del error en la aproximación de $\Gamma_h$ está dada por
+	\[
+	\epsilon_{Int}= \left({\int_{\Gamma_h} |\phi_h|^2}
+	\right)^{1/2}
+	\]
+}
+%\bibliography{levelset}	

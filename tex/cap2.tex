@@ -1,0 +1,422 @@
+\chapter{\MakeUppercase{Planteamiento del problema dinámico del tumor avascular}}
+%\chapter{Planteamiento del problema dinámico del tumor avascular}
+\thispagestyle{fancy}
+\section{Planteamiento del modelo matemático del crecimiento dinámico tumoral}
+Consideramos que el tumor ocupa un dominio acotado $\Omega\subset\mathbb{R}^2$ con frontera $\Gamma$  que cambia con el tiempo $t$ medido en minutos. Las variables de la dinámica del crecimiento tumoral son la concentración de nutrientes y la presión intracelular.
+
+La concentración de nutrientes al interior del tumor se representa mediante la función $\sigma$ $\equiv$ $\sigma(x,y,t)$ que obedece a la siguiente ecuación de difusión:
+\begin{equation}
+	D_N \Delta \sigma - \gamma (\sigma -\sigma_B )-\delta_N \sigma=0 \text{ en } \Omega
+\end{equation}
+donde $D_N$ es el coeficiente de difusión, $- \gamma (\sigma -\sigma_B )$ modela la velocidad de transferencia de nutrientes desde los vasos sanguíneos,  $\delta_N \sigma$ representa el consumo de nutrientes  por parte de la células vivas en el tumor. 
+
+Adicionalmente el tumor es modelado como un fluido incompresible de velocidad $u\equiv u(x,y,t)$ que se rige por la ecuación de continuidad
+\begin{equation}
+	\nabla \cdot u = \gamma_T \sigma - \delta _T\text{ en } \Omega
+\end{equation}
+donde el lado derecho de la ecuación expresa la velocidad de reproducción  de las células del tumor menos la velocidad de muerte celular.
+
+La velocidad está relacionada con el gradiente de presión por medio de la ley de Darcy:
+\begin{equation}
+	u=-w_t \nabla p \text{ en } \Omega
+\end{equation}
+donde $p\equiv p(x,y,t)$ es la presión del fluido al interior del tumor y $w_T$ representa la movilidad celular, lo que nos permite escribir la siguiente ecuación para la presión 
+\begin{equation}
+	\Delta p = -\frac{\gamma_T}{w_T} \sigma + \frac{\delta _T}{w_T}\text{ en } \Omega
+\end{equation}
+
+\section{Condiciones de borde en la frontera libre}
+Asumimos que la concentración de nutrientes $\sigma_{out}$ en la frontera del tumor es constante e igual a la concentración de nutriente en el exterior del tumor.
+\begin{equation}
+	\sigma |_{\Gamma}  = \sigma_{out}
+\end{equation}
+
+La presión satisface la relación de Young-Laplace en la frontera 
+\begin{equation}
+	p |_{\Gamma}  = \gamma \kappa
+\end{equation}
+donde $\gamma$ representa la tensión superficial y $\kappa$ es la curvatura de la frontera $\partial\Omega$.
+
+La velocidad normal $V_n$, con la que se desplaza la frontera del tumor es la componente normal de la velocidad $u$ 
+\begin{equation}
+	V_n = 	u |_{\Gamma} \cdot n  = 
+	-w_T	\nabla p |_{\Gamma} \cdot n 
+\end{equation}
+donde $n$ es la normal unitaria exterior a $\Gamma$.
+
+\section{Modelo adimensional}
+
+Siguiendo \citep{cristini2008nonlinear} introducimos las siguientes constantes
+\begin{align}
+	L_D & = \dfrac{ D_N^{1/2}}{ (\gamma_B + \delta_N)^{1/2}}\\
+	\lambda_R &= \frac{w_T \gamma}{ L^3_D}
+\end{align}
+y variables adimensionales
+\begin{align}
+	\overline{x} & = \dfrac{ x}{L_D}\\
+	\overline{y} & = \dfrac{ y}{L_D}\\
+	\overline{t} & = \lambda_R t\\	
+	\overline{\sigma} & = \dfrac{ \sigma}{\sigma_{out}}\\
+	\overline{p} & = \dfrac{ L_D}{\gamma }p					
+\end{align}
+Así el modelo de crecimiento tumoral queda expresado en las siguientes ecuaciones adimensionales:
+\begin{align}
+	&	\Delta \overline{\sigma}- \overline{\sigma}+  \frac{\gamma_B\sigma_B}{\sigma_{out}(\gamma_B + \delta_N)}=0 \text{ en } \overline{\Omega}\\
+	&	\Delta \overline{p} = -\frac{\gamma_T \sigma_{out}}{\lambda_R} \overline{\sigma} + \frac{\delta _T}{\lambda_R}\text{ en } \overline{\Omega}\\
+	&	\overline{\sigma} |_{\partial \overline{\Omega}}  = 1\\
+	&	\overline{p} |_{\partial \overline{\Omega}}  = \kappa \\
+	&	\overline{V}_n = 	
+	-	\nabla \overline{p} |_{\partial \overline{\Omega}} \cdot n 
+\end{align}
+donde $\overline{\Omega}$ es el dominio luego del cambio de coordenadas con las variables adimensionales $(\overline{x},\overline{y})$.
+\section{Modelo desacoplado}
+El modelo acoplado anterior puede simplificarse si hacemos 
+\begin{equation}
+	\lambda_M= \gamma_T \sigma_{out}
+\end{equation}
+\begin{equation}
+	B=\frac{\gamma_B\sigma_B}{\sigma_{out}(\gamma_B + \delta_N)}
+\end{equation}
+\begin{equation} 
+	G=\frac{\lambda_M}{\lambda_R}(1-B)
+	\label{eqn:G}
+\end{equation}
+\begin{equation}
+	A=\frac{\dfrac{\delta_T}{\lambda_M}-B}{1-B}
+	\label{eqn:A}
+\end{equation}
+\begin{equation}
+	U=\frac{ \overline{\sigma}-B }{1-B}
+\end{equation}
+\begin{equation}
+	P=\overline{p} + (1-U)G- AG\left( \frac{\overline{x}^2+\overline{y}^2}{4}\right)
+\end{equation}
+de modo que las nuevas variables $U$, $P$, $V_n$ satisfacen el siguiente sistema de ecuaciones:
+\begin{align}
+	-\Delta U + U  &= 0 \text{ en }  \overline{\Omega}\\
+	U &= 1 	 \text{ en }  \partial \overline{\Omega}\\
+	\Delta P  &= 0 \text{ en }  \overline{\Omega}\\
+	P &= \kappa - AG\left( \frac{\overline{x}^2+\overline{y}^2}{4} \right)	 \text{ en }  \partial \overline{\Omega}\\
+	V_n& =-\nabla P \cdot n + G \nabla U \cdot n- AG \frac{n\cdot (\overline{x},\overline{y})}{2} \text{ en }  \partial \overline{\Omega} \label{eqn:velocidadVn}
+\end{align}	
+Para simplificar la notación se omitirán  barras al escribir los dominios y cantidades relacionadas a las variables adimensionales.
+
+\section{Evolución de la frontera libre}
+Consideramos que $\Omega$ y $\Gamma$ pueden ser definidas mediante cierta función $\phi$ llamada también \emph{función conjunto de nivel}:
+\[
+\Omega = \{ \phi<0\}\quad y \quad  \Gamma
+=\{ \phi =0\}.
+\]
+además suponemos que $\phi$ en $t=0$ se comporta como una función distancia dirigida 
+\[
+\phi(x)=
+\left\{
+\begin{aligned}
+	-{\rm dist}(x,\Gamma)&,&x\in\Omega\\
+	{\rm dist}(x,\Gamma)&,&x\not\in\Omega
+\end{aligned}
+\right.
+\]
+en tal caso $\phi$ es Lipschitz continua, y si es diferenciable en $x\not \in \Gamma$ entonces $|\nabla \phi|=1$ \citep{delfour1994shape}. Como $\Gamma$ es una  curva de nivel 0 para $\phi$ entonces la normal exterior a $\Gamma$ es
+\[
+n = \frac{\nabla \phi}{|\nabla \phi|}
+\]
+
+Por ejemplo, para $\Omega=\{(x,y):x^2+y^2<R^2\}$ podemos elegir $\phi(x,y)=\sqrt{x^2+y^2}-R$ y en consecuencia  $\nabla\phi=(x/\sqrt{x^2+y^2},y/\sqrt{x^2+y^2})$ excepto en el origen, y la normal unitaria es $n=(x/R,y/R)$ en $\Gamma$.
+
+En términos de las curvas de nivel, la curvatura está dada por
+\[
+\kappa = \nabla \cdot n = 
+\nabla \cdot \left(\frac{\nabla \phi }{ |\nabla \phi |} \right)
+=\frac{ \phi_{xx} \phi_{y}^2 - 2 \phi_{x} \phi_{y} \phi_{xy}
+	+\phi_{yy} \phi_{x}^2  }{  ( \phi_{x}^2+ \phi_{y}^2   )^{1/2}}
+\] 
+de igual manera si $\Gamma$ se puede representar en forma polar $\left\{ (r,\theta),r\geq 0,r=f(\theta) \right\}$ entonces la función conjunto de nivel será $\phi(r,\theta) = r-f(\theta)$ y la curvatura está dada por
+\[
+\kappa =\frac{r^2 +2(f'(\theta))^2-rf''(\theta)}{
+	\left[
+	(f'(\theta))^2+r^2
+	\right]^{3/2}
+}
+\]
+y $
+\nabla \phi =(\cos\theta,\sen\theta)+\frac{f'(\theta)}{r}(\sen\theta,-\cos\theta)$ de modo que $|\nabla \phi|=\sqrt{1+\frac{f'(\theta)^2}{r^2}}$.
+
+En cualquier instante $t$ la frontera del tumor $\Gamma(t)$ está dada por el conjunto de nivel 0,
+\[
+\Gamma(t) =\left\{ (x,y): \phi(x,y,t)=0\right\}
+\] y si una partícula permanece en la  posición $(x(t),y(t))$ sobre la frontera, entonces  $\phi(x(t),y(t),t)=0$, por lo tanto
+\[
+\begin{aligned}	
+	\frac{d \phi}{dt}=0&= \frac{\partial \phi}{ \partial t}
+	+\frac{\partial \phi}{ \partial x} \frac{d x}{dt}
+	+\frac{\partial \phi}{ \partial y} \frac{d y}{dt}\\
+	&=\frac{\partial \phi}{ \partial t}+\nabla \phi \cdot V
+\end{aligned}
+\]
+donde $V$ es la velocidad de la partícula. Como 
+la normal unitaria en la frontera está dada por $
+n = \frac{\nabla \phi}{|\nabla \phi|}$ y $V=V_n n$  entonces
+\[
+\begin{aligned}	
+	\frac{\partial \phi}{ \partial t}+V_n |\nabla \phi |=0\text{ en } \Gamma(t)
+\end{aligned}
+\]
+esta ecuación solo es válida en la frontera, sin embargo al introducir la función conjunto de nivel podemos resolver la ecuación en un dominio fijo $\mathcal{O}\subset \mathbb{R}^{2}$, para ello es necesario encontrar una extensión $S=(S_1, S_2)$ para la velocidad $V$ de tal modo que 
+\[
+S_1 = V_n n_1, S_2 = V_n n_2\text{ en }\Gamma
+\]
+y así plantear la siguiente ecuación de advección para $\phi$
+\begin{equation}
+	\frac{\partial \phi}{ \partial t} + S \cdot \nabla \phi=0\text{ en } \mathcal{O}
+	\label{eqn:evolucionconjuntodenivel}
+\end{equation}
+\section{Extensión de la velocidad de crecimiento}
+Decimos que $u_{ext}$ es la extensión de $u_0$ definida en $\Gamma$ a todo el dominio fijo $\mathcal{O}$ si es la solución del siguiente problema:
+\begin{equation}
+	\begin{cases}
+		\nabla \phi \cdot \nabla u =0& \text{ en }\mathcal{O}\\
+		u =u_0 &\text{ en }\Gamma
+	\end{cases}	
+	\label{eqn:extension}
+\end{equation}
+Sea $S=(S_1, S_2)$ una extensión de la velocidad $V=(v_1,v_2)$ en la frontera del tumor, de modo que $S_1$ extiende $v_1$ y $S_2$ extiende $v_2$, es decir  $\nabla S_1 \cdot \nabla\phi =0$ y $\nabla S_2 \cdot \nabla\phi =0$ por lo tanto
+\[
+(S_1)_x \phi_x +(S_1)_y \phi_y=0
+\]
+\[
+(S_2)_x \phi_x +(S_2)_y \phi_y=0
+\]
+Derivamos la expresión dada en la ecuación \ref{eqn:evolucionconjuntodenivel} respecto de $x$
+\[
+\frac{ \partial\phi_x}{ \partial t} + S_1 \phi_{xx}  + S_2 \phi_{xy}  +  (S_1)_x \phi_{x}  + (S_2)_x \phi_{y} =0
+\]
+ y también respecto de $y$ 
+\[
+\frac{\partial \phi_y}{ \partial t} + S_1 \phi_{xy}  + S_2 \phi_{yy}  +  (S_1)_y \phi_{x}  + (S_2)_y \phi_{y} =0
+\]
+multiplicamos por $\phi_x$, $\phi_y$ respectivamente y sumamos
+\[
+\frac{\partial |\nabla \phi|^2}{ \partial t} + 
+\phi_x(\nabla S_1 \cdot \nabla\phi ) + \phi_y(\nabla S_2 \cdot \nabla\phi )
++ \frac{1}{2} S\cdot \nabla (\|\nabla \phi\|^2)=0
+\]
+de modo que si $\|\nabla \phi\|^2=1$ entonces $\frac{\partial |\nabla \phi|^2}{ \partial t}=0$, es decir la propiedad de la distancia dirigida es conservada.
+
+\begin{defi}
+Sea $F$ una función de $V$ en $\mathbb{R}$. Si existe
+\[
+\lim_{t\to 0^+} \frac{F(u+tv)-F(u)}{t}
+\]
+entonces será llamado derivada direccional de $F$ en la dirección $v$ y denotado por $F'(u;v)$. Si $F'(u;v)$ existe para todo $v\in V$ entonces $F$ se dice G\^{a}teaux diferenciable en $u$ y la aplicación lineal $\partial F[u]:V\to\mathbb{R}$ tal que $\partial F[u](v)=F'(u;v)$ se llama derivada de G\^{a}teaux de $F$ en $u$.
+\end{defi}
+
+Para formular la ecuación \ref{eqn:extension} como un problema elíptico definimos 
+\[
+R(v)= \frac{1}{2}\int_\mathcal{O} (\nabla \phi \cdot \nabla v)^2 + \frac{\gamma}{2}\int_\Gamma (v-u_0)^2
+\] de modo que si $u$ extiende $u_0$ entonces de acuerdo a \citep{utz2018high}  se resuelve el  siguiente problema de minimización: 
+\[
+\min_{v\in H^1(\mathcal{O})} R(v) 
+\]
+luego la derivada de G\^{a}teaux es
+\[
+\partial R[u](v)=\lim_{t\to 0}\frac{R(u+tv)-R(u)}{t} = \int_\mathcal{O} (\nabla \phi \cdot \nabla u)(\nabla \phi \cdot \nabla v)+
+\gamma \int_\Gamma (u-u_0)v
+\]
+formalmente podemos multiplicar por $\nabla \phi \cdot \nabla v$ y luego 
+\[
+\int_\mathcal{O} (\nabla \phi \cdot \nabla u)(\nabla \phi \cdot \nabla v)=-\int_\mathcal{O}( \nabla \cdot (A \nabla u))v+\int_{\partial\mathcal{O}}    ((A \nabla u) \cdot n)v
+\]
+donde $A=\begin{bmatrix} \phi_x^2 &  \phi_{x}\phi_{y} \\ \phi_{x}\phi_{y} & \phi_y^2 \end{bmatrix}$, lo que nos lleva al siguiente problema elíptico
+\begin{equation}
+	\begin{aligned}
+		\nabla \cdot (A \nabla u)=0 & \text{ en }  \mathcal{O}\setminus \Gamma \\
+		(A \nabla u) \cdot n=0 &	 \text{ en }  \partial \mathcal{O}\\
+		u=u_0 &	 \text{ en } \Gamma
+	\end{aligned}
+\end{equation}
+que debe resolverse para encontrar $S_1$ y $S_2$.
+
+
+\section{Solución circular}
+Recordemos que la ecuación 
+\[
+-\Delta u + \beta u =0
+\]
+es equivalente en coordenadas polares a
+\[
+u_{rr}+\frac{1}{r^2}u_{\theta\theta}+\frac{1}{r}u_r-\beta u=0
+\]
+si consideramos el caso de las soluciones con  simetría radial, es decir $u_{\theta}=0$, y $\partial\Omega=\left\{(r;\theta): r=R\right\}$  entonces $\kappa=1/R$, por lo tanto la ecuación para la presión se reduce a:
+\[
+\begin{aligned}
+	P''(r)+\frac{1}{r}P'(r) &= 0 \text{ en }  \left]0,R\right[\\
+	P(R) &= \frac{1}{R} - AG \frac{R}{4}  \\
+\end{aligned}
+\]	
+cuya solución no singular es constante: $P(r) = \frac{1}{R} - AG \frac{R}{4},r\in[0,R]$.
+
+La ecuación para la concentración de nutrientes se reduce a la ecuación diferencial de segundo orden del tipo
+\begin{equation}
+	\begin{aligned}
+		r^2 U''(r)+rU'(r)-r^2U(r)&= 0 \text{ en }  \left]0,R\right[\\
+		U(R) &= 1\\
+	\end{aligned}
+	\label{eqn:edocircular}
+\end{equation}
+que tiene como solución no singular  $U(r)=\frac{I_0(r)}{I_0(R)},r\in[0,R]$, donde $I_0(x)$ es una función modificada de Bessel de primer tipo \citep{gradshteyn2014table} cuya forma explícita es: 
+\[
+I_p(x)=\left( \frac{x}{2} \right)^p \sum_{k=0}^\infty \frac{x^{2k}}{4^k k!\Gamma(p+k+1)},x\in\mathbb{R},p>-1
+\]
+en particular
+\[
+I_0(x)=\sum_{k=0}^\infty \frac{(\frac{1}{4}x^2)^k}{(k!)^2}
+\]
+luego la velocidad de crecimiento del radio del tumor $R$, será
+\begin{equation}
+	\begin{aligned}
+		V=\frac{dR}{dt}&=G\nabla U\cdot n-AG\frac{n\cdot(x,y)}{2}\\
+		&=GU'(R)-AG\frac{R}{2}\\
+		&=G\frac{I_1(R)}{I_0(R)}-AG\frac{R}{2}	
+	\end{aligned}
+	\label{eqn:edoradiotumor}
+\end{equation}
+De \citep{simpson1984some} vemos que $w_0:\left]0,+\infty\right[\to\mathbb{R}$ definida por $w_0(x)=\dfrac{xI_0(x)}{I_1(x)}$ es estrictamente creciente y convexa, %además de \citep{baricz2010bounds} tenemos que
+%\[
+%\frac{I_1(x)}{xI_0(x)}=\sum_{n\geq 1}\frac{2}{x^2+j^2_{0,n}}
+%\]eqn:phi
+%donde $j_{0,n}$, 
+además en \citep{garofalo2020two} se muestra que:
+\[
+\lim_{x\to 0^+} 2\frac{(p+1)}{x}\frac{I_{p+1}}{I_p}=1,\quad p>-1
+\]
+y por lo tanto para $p=0$ concluimos que \[
+\lim_{x\to 0^+} w_0(x)=2\]
+
+La siguiente desigualdad es obtenida en \citep{yang2017sharp}:
+\[
+\sqrt{x^2+(p-1)^2}+p-1<\frac{xI_{p-1}}{I_p}<\sqrt{x^2+p^2}+p,\quad p\geq 1,x>0
+\]
+luego 
+\[
+x<w_0<\sqrt{x^2+1}+1
+\]
+y por lo tanto
+\[
+\lim_{x\to +\infty} w_0(x)=+\infty	
+\]
+Podemos escribir la velocidad de crecimiento del tumor como
+\[
+V= GR\left(\frac{1}{w_0(R)} -\frac{A}{2}\right)
+\]
+y analizar los siguientes casos:
+\begin{itemize}
+	\item $G\geq 0$, $A>0$. 
+	
+	Si $0<A<1$ entonces existe un único $R_\infty>0 $ tal que $w_0(R_\infty)=\frac{2}{A}$, por lo que  $V(R_\infty)=0$ y por tanto $R=R_\infty$ es una solución estacionaria de la ecuación de crecimiento tumoral, además
+	\[
+	R_\infty<\frac{2}{A}<\sqrt{	R_\infty^2+1}+1\\
+	\]
+	o
+	\begin{equation}
+		\sqrt{(\frac{2}{A}-1)^2-1}<R_{\infty}<\frac{2}{A}
+		\label{eqn:radioestacionario}
+	\end{equation}
+	Si $A \geq 1$ entonces $V<0$ es decir el tumor decrece y tiende a desaparecer.
+	\item $A\leq 0$ y $G\geq 0$. Entonces 
+	\[
+	V=G\frac{I_1}{I_0}-AG\frac{R}{2}>0
+	\]
+	por lo que $R$ es creciente, es decir el tumor crece de manera acelerada.
+	\item  $G<0$. El crecimiento es acelerado o alcanza un punto de equilibrio si $A>0$ de manera similar al primer caso. El tumor tiende a desaparecer si $A<0$ pues tendremos que $V<0$.
+	
+\end{itemize}
+De acuerdo a \cite{hogea2005computational} los regímenes de crecimiento tumoral pueden ser caracterizados por los parámetros $G$ y $A$:
+\begin{itemize}
+	\item Régimen de baja vascularización: $G\geq 0$, $A>0$. Corresponde a poca presencia de vasos sanguíneos al interior del tumor y por lo tanto los nutrientes no son suficientes para acelerar el crecimiento tumoral. En el caso de un tumor con frontera circular si $0<A<1$ se alcanza una solución estacionaria (\ref{eqn:radioestacionario}), si $A\geq 1$ el tumor tiende a desaparecer. 
+	\item Régimen de vascularización moderada: $G\geq 0$, $A\leq 0$. En esta etapa el aumento de vasos sanguíneos al interior del tumor brinda una mayor cantidad de nutrientes y por lo tanto el crecimiento del tumor se acelera.
+	\item Régimen de alta vascularización: $G<0$. En esta etapa el tumor ha desarrollado una densa red de vasos sanguíneos esto puede llevar a un crecimiento acelerado del tumor o a su estabilización dependiendo  si $A>0$ o $A<0$.
+\end{itemize}
+
+%
+%\section{Soluciones lineales}
+%Consideramos que la frontera del tumor esta representada por
+%\[
+%r(t,\theta) = R(t) + \delta(t)\cos(l\theta)
+%\]
+%por lo tanto
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%	
+%	\begin{figure}[H]
+	%		\centering
+	%		\begin{tikzpicture}
+		%			\begin{loglogaxis}[xlabel=$h$,ylabel=$\epsilon_h$,
+			%				legend style=
+			%				{
+				%					at={(1,1)},
+				%					anchor=north west,
+				%					draw=none,
+				%					fill=none
+				%				},
+			%				legend cell align=left,]
+			%				\addplot[blue,line width=1pt,domain=0.04:3] {exp(1.3266*ln(x)-3.7013)};
+			%				\addplot[red,line width=1pt,domain=0.04:3] {exp(1.0790*ln(x)-0.9396)};	
+			%				\addplot[only marks,color=blue,mark=otimes*] coordinates {
+				%					(2.82843 ,  0.0891674)
+				%					(1.41421 ,  0.0436996)
+				%					(0.707107 ,  0.0149696)
+				%					(0.353553 , 0.00679741)
+				%					(0.176777 ,  0.0022653)
+				%					(0.0883883 , 0.00108145)
+				%					(0.0441942 ,0.000369282)
+				%				};
+			%				\addplot[only marks,color=red,mark=square*] coordinates {
+				%					(2.82843 ,   1.79489)
+				%					(1.41421 ,  0.344859)
+				%					(0.707107 ,   0.284266)
+				%					(0.353553 ,0.141762)
+				%					(0.176777 ,  0.0513602)
+				%					(0.0883883 , 0.0245787)
+				%					(0.0441942 ,0.0171774)
+				%				};
+			%				\legend
+			%				{
+				%					$r=4$,
+				%					$r=2.1 + 0.5\cos(2\theta)$,
+				%				}
+			%			\end{loglogaxis}
+		%		\end{tikzpicture}
+	%		\caption{Error en la curvatura de una circunferencia de radio 4}
+	%		\label{fig:errorcurvatura}
+	%	\end{figure}
+%	\begin{table}[h]
+	%		\centering
+	%		\begin{tabular}{ccc}
+		%			$h$ & $H_k$ & $\epsilon_h$ \\
+		%			\hline
+		%			2.8284 &  0.269424 &  0.0892\\
+		%			1.4142 & 0.259138  & 0.0437\\
+		%			0.7071 &  0.252702 & 0.0150\\
+		%			0.3536 &  0.250265 & 0.0068\\
+		%			0.1768 &   0.250189 & 0.0023\\
+		%			0.0884 &  0.25002  & 0.0011\\
+		%			0.0442 &   0.250013 & 0.0004\\
+		%		\end{tabular}
+	%		\caption{}
+	%		\label{tab:curvaturacirculo}
+	%	\end{table}
+
+%\[
+%\begin{aligned}
+%	-\Delta u + \alpha u  = 0 \text{ en }  \Omega\\
+%	u = g 	 \text{ en }  \partial \Omega\\
+%\end{aligned}
+%\]	
+%\section{Definición del dominio de estudio simétrico y no simétrico}
+%\section{Condiciones de frontera libre del dominio físico del tumor avascular}
+%\section{Espacios funcionales de estudio de las variables presión-velocidad del comportamiento avascular}
+%\section{Formulación variacional del problema dinámico avascular}

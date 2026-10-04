@@ -1,0 +1,554 @@
+\documentclass[12pt,a4paper]{report}
+%use larger type; default would be 10pt
+%\usepackage[lining,semibold,type1]{libertine}
+\counterwithout{figure}{chapter}
+\counterwithout{equation}{chapter}
+\usepackage{amsmath,amssymb,amsthm}
+%\usepackage{libertine}
+%\usepackage{libertinust1math}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc} % set input encoding (not needed with XeLaTeX)
+\usepackage{indentfirst}
+\usepackage[dvipsnames]{xcolor}
+\definecolor{gray}{rgb}{0.85,0.85,0.85}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\usepackage{listings}
+\lstset{language=Octave,
+	backgroundcolor=\color{white},   % choose the background color; you must add \usepackage{color} or \usepackage{xcolor}
+	basicstyle=\footnotesize,%\ttfamily,        % the size of the fonts that are used for the code
+	breakatwhitespace=false,         % sets if automatic breaks should only happen at whitespace
+	breaklines=true,                 % sets automatic line breaking
+	captionpos=b,                    % sets the caption-position to bottom
+	commentstyle=\color{codegreen},    % comment style
+	%escapeinside={\%*}{*)},          % if you want to add LaTeX within your code
+	extendedchars=true,            % lets you use non-ASCII characters; for 8-bits encodings only, does not work with UTF-8
+	frame=single,                    % adds a frame around the code
+	% frameround=fttt,
+	keepspaces=true,                 % keeps spaces in text, useful for keeping indentation of code (possibly needs columns=flexible)
+	classoffset=0,
+	keywordstyle=\color{black},%\color{RoyalBlue},       % keyword style
+	deletekeywords={function,endfunction, if,endif},
+	classoffset=1,
+	morekeywords={function,endfunction, if,endif},
+	keywordstyle=\bf\color{Red},       % keyword style
+	classoffset=2,
+	morekeywords={persistent},            % if you want to add more keywords to the set
+	keywordstyle=\bf\color{ForestGreen},       % keyword style
+	classoffset=0,
+	literate=
+	{/}{{{\color{Mahogany}/}}}1
+	{*}{{{\color{Mahogany}*}}}1
+	{.*}{{{\color{Mahogany}.*}}}2
+	{+}{{{\color{Mahogany}+{}}}}1
+	{=}{{{\bf\color{Mahogany}=}}}1
+	{-}{{{\color{Mahogany}-}}}1
+	{[}{{{\bf\color{RedOrange}[}}}1
+	{]}{{{\bf\color{RedOrange}]}}}1
+	{ç}{{\c{c}}}1 % Cedilha
+	{á}{{\'{a}}}1 % Acentos agudos
+	{é}{{\'{e}}}1
+	{í}{{\'{i}}}1
+	{ó}{{\'{o}}}1
+	{ú}{{\'{u}}}1
+	{â}{{\^{a}}}1 % Acentos circunflexos
+	{ê}{{\^{e}}}1
+	{î}{{\^{i}}}1
+	{ô}{{\^{o}}}1
+	{û}{{\^{u}}}1
+	{à}{{\`{a}}}1 % Acentos graves
+	{è}{{\`{e}}}1
+	{ì}{{\`{i}}}1
+	{ò}{{\`{o}}}1
+	{ù}{{\`{u}}}1
+	{ã}{{\~{a}}}1 % Tils
+	{ẽ}{{\~{e}}}1
+	{ĩ}{{\~{i}}}1
+	{õ}{{\~{o}}}1
+	{ũ}{{\~{u}}}1,
+	numbers=left,                    % where to put the line-numbers; possible values are (none, left, right)
+	numbersep=6pt,                   % how far the line-numbers are from the code
+	numberstyle=\tiny\color{gray}, % the style that is used for the line-numbers
+	rulecolor=\color{black},         % if not set, the frame-color may be changed on line-breaks within not-black text (e.g. comments (green here))
+	showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+	showstringspaces=false,          % underline spaces within strings only
+	showtabs=false,                  % show tabs within strings adding particular underscores
+	stepnumber=1,                    % the step between two line-numbers. If it's 1, each line will be numbered
+	stringstyle=\color{black},%\color{purple},     % string literal style
+	tabsize=2,                       % sets default tabsize to 2 spaces
+	title=\lstname,    }
+%\usepackage{textcomp}
+%\usepackage[varg, cmintegrals, cmbraces, ]{newtxtext,newtxmath}
+
+% fuentes%%%%%%%%%%%%%%%%%%%%%
+%\usepackage{newtxtext}
+%\usepackage[varqu,varl]{inconsolata}% a typewriter font must be defined
+%\usepackage{cabin}% sans serif
+%\usepackage[libertine,vvarbb]{newtxmath}
+% required for special glyphs
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{newtxtext,newtxmath}
+%\usepackage[scaled=0.86]{helvet}
+%\usepackage[scaled]{helvet}
+%\renewcommand{\familydefault}{\sfdefault}
+
+\usepackage{bm} 
+%\usepackage[T1]{fontenc}
+%%% Examples of Article customizations
+% These packages are optional, depending whether you want the features they provide.
+% See the LaTeX Companion or other references for full information.
+\DeclareUnicodeCharacter{0301}{*************************************}
+%%% PAGE DIMENSIONS
+\usepackage{geometry} % to change the page dimensions
+%\geometry{} % or letterpaper (US) or a5paper or....
+\geometry{left=30mm,right=25mm,top=30mm,bottom=25mm}
+% \geometry{margins=2in} % for example, change the margins to 2 inches all round
+% \geometry{landscape} % set up the page for landscape
+%   read geometry.pdf for detailed page layout information
+
+\usepackage{graphicx} % support the \includegraphics command and options
+\graphicspath{{img/}}
+% \usepackage[parfill]{parskip} % Activate to begin paragraphs with an empty line rather than an indent
+
+%%% PACKAGES
+\usepackage{multirow}
+\usepackage{booktabs} % for much better looking tables
+\usepackage{array} % for better arrays (eg matrices) in maths
+\usepackage{paralist} % very flexible & customisable lists (eg. enumerate/itemize, etc.)
+\usepackage{verbatim} % adds environment for commenting out blocks of text & for better verbatim
+\usepackage{subfig} % make it possible to include more than one captioned figure/table in a single float
+% These packages are all incorporated in the memoir class to one degree or another...
+\usepackage[figure,spanish,linesnumbered,algochapter,vlined]{algorithm2e}
+\SetAlFnt{\footnotesize}
+\usepackage{stmaryrd} % \llbracket   \rrbracket
+%\usepackage{times}
+\usepackage{array,dcolumn}
+%%% HEADERS & FOOTERS
+\usepackage{fancyhdr} % This should be set AFTER setting up the page geometry
+\pagestyle{fancy} % options: empty , plain , fancy
+\renewcommand{\headrulewidth}{0pt} % customise the layout...
+\lhead{}\chead{}\rhead{}
+\lfoot{}\cfoot{\thepage}\rfoot{}
+
+%%% SECTION TITLE APPEARANCE
+%\usepackage{sectsty}
+%\allsectionsfont{\sffamily\mdseries\upshape} % (See the fntguide.pdf for font help)
+%\chapterfont{\centering}
+% (This matches ConTeXt defaults)
+\usepackage{titlesec}
+%\titleformat{\chapter}[display]
+%{\normalfont\sffamily\Large\bfseries\centering}
+%{\chaptertitlename\ \thechapter}{0pt}{\MakeUppercase}
+%\titlespacing*{\chapter}{0pt}{30pt}{20pt}
+
+\titleformat{\chapter}[display]
+{\normalfont\sffamily\Large\bfseries\centering}
+{\MakeUppercase{\chaptertitlename}~\Roman{chapter}}{1.5em}{}
+\titlespacing*{\chapter}{0pt}{12pt}{0pt}
+\titlespacing*{\section}{0pt}{0pt}{0pt}
+\titlespacing*{\subsection}{1.27cm}{0pt}{0pt}
+\titlespacing*{\subsubsection}{1.40cm}{0pt}{0pt}
+\titleformat{\section}
+%{\normalfont\sffamily\large\bfseries\centering}
+{\itshape\sffamily\normalsize\bfseries}
+{\makebox[1.27cm]{\thesection}}{0em}{}
+\titleformat{\subsection}
+%{\normalfont\sffamily\large\bfseries\centering}
+{\itshape\sffamily\normalsize\bfseries}
+{\thesubsection}{1em}{}
+\titleformat{\subsubsection}
+%{\normalfont\sffamily\large\bfseries\centering}
+{\itshape\sffamily\normalsize\bfseries}
+{\thesubsubsection}{1em}{}
+
+\usepackage{hyperref}
+\hypersetup{
+	hidelinks,
+	colorlinks=false,
+	linkcolor=blue,
+	filecolor=magenta,      
+	urlcolor=cyan,
+	pdftitle={Modelación matemática y simulación numérica de la Dinámica del 
+		Crecimiento de un Tumor Avascular (DCTA) con el Método de Elementos Finitos y conjuntos de nivel}
+	%	pdfpagemode=FullScreen,
+}
+\usepackage{float}
+%\floatstyle{boxed}
+%\restylefloat{figure}
+%\restylefloat{table} 
+\usepackage{caption}
+\usepackage{varwidth}
+\DeclareCaptionFormat{myformat}{%
+	% #1: label (e.g. "Table 1")
+	% #2: separator (e.g. ": ")
+	% #3: caption text
+	\begin{varwidth}{\linewidth}%
+		\centering
+		#1\vspace{12pt}#2#3%
+	\end{varwidth}%
+}
+\DeclareCaptionLabelSeparator{twolines}{\newline\newline}
+\captionsetup[table]{
+	format=myformat,
+	labelsep=newline,
+	aboveskip=0pt,
+	font={footnotesize},
+	width=\textwidth,
+	%	format=hang,
+	justification=centering,
+	singlelinecheck=false,
+	position=top,
+}
+\captionsetup[figure]{%
+	labelsep=period,
+	aboveskip=0pt,	
+	font={footnotesize},
+	width=0.9\textwidth,
+	%format=hang,
+	justification=justified,
+	singlelinecheck=false,
+	position=above
+}
+%\captionsetup[figure]{labelfont={sc},textfont={sl}}
+%\captionsetup[table]{labelfont={sc},textfont={sl}}
+%\DeclareCaptionLabelSeparator{table}{newline}
+%\DeclareCaptionLabelSeparator{figure}{period}
+\renewcommand{\thefigure}{\arabic{figure}}
+\renewcommand{\thetable}{\arabic{table}}
+\renewcommand{\theequation}{\arabic{equation}}
+
+\usepackage{setspace}
+
+%\usepackage[nottoc]{tocbibind}
+\usepackage[square,numbers]{natbib}
+%\usepackage{chapterbib}
+%\bibliographystyle{apa-good}
+%\bibliographystyle{unsrtnat}
+
+%\usepackage{csquotes}
+%\RequirePackage[style=apa,sortcites=true,sorting=nyt,backend=biber]{biblatex}
+%\DeclareLanguageMapping{spanish}{spanish-apa}
+%\addbibresource{levelset.bib}
+%\let\cite\textcite
+%\let\citep\parencite
+
+%\usepackage[natbibapa]{apacite} 
+%\bibliographystyle{apacite}
+
+%%% END Article customizations
+\newcommand{\comentario}[1]{}
+\newcommand{\vertiii}[1]{{\left\vert\kern-0.25ex\left\vert\kern-0.25ex\left\vert #1 
+		\right\vert\kern-0.25ex\right\vert\kern-0.25ex\right\vert}}
+\newcommand{\dlim}{\displaystyle\lim}
+\newcommand{\dint}{\displaystyle\int}
+\newcommand{\dsum}{\displaystyle\sum}
+\newcommand{\dmax}{\displaystyle\max}
+\newcommand{\R}{\mathbb{R}}
+\newtheorem{teo}{Teorema}
+\renewcommand{\theteo}{\thesection\arabic{teo}}
+\makeatletter
+\@addtoreset {teo}{chapter}
+\makeatother
+\newtheorem{defi}{Definición}
+\newtheorem{ejem}{Ejemplo}
+\newtheorem{premisa}{Premisa} 
+\newtheorem{lema}{Lema} 
+\newtheorem{obs}{Observación} 
+\newtheorem{prop}{Proposición} 
+\newtheorem{coro}{Corolario}
+\newtheorem{afir}{Afirmación}
+%
+%\newtheorem{teo}{Teorema}
+%\renewcommand{\theteo}{\thesection.\arabic{teo}}
+%\makeatletter
+%\@addtoreset {teo}{chapter}
+%\makeatother
+%\newtheorem{defi}[teo]{Definición}
+%\newtheorem{prop}[teo]{Proposición}
+%\newtheorem{obs}[teo]{Observación}
+%\newtheorem{coro}[teo]{Corolario}
+%\newtheorem{lema}[teo]{Lema}
+%\newtheorem{afir}[teo]{Afirmación}
+
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator{\sgn}{sgn}
+\DeclareMathOperator{\card}{card}
+\DeclareMathOperator \sen {sen}
+\DeclareMathOperator*\esssup {ess\,sup}
+
+\newcommand{\vect}[1]{\boldsymbol{#1}}
+% PAGINA DE PORTADA
+\makeatletter
+\def\universidad#1{\gdef\@universidad{#1}}
+\def\facultad#1{\gdef\@facultad{#1}}
+\def\escudo#1#2#3{\gdef\@escudo{#1}\gdef\ancho@escudo{#2}\gdef\alto@escudo{#3}}
+\def\tesispara#1{\gdef\@tesispara{#1}}
+\def\por#1{\gdef\@por{#1}}
+\def\orcidauthor#1{\gdef\@orcidauthor{#1}}
+\def\orcidasesor#1{\gdef\@orcidasesor{#1}}
+\def\asesor#1{\gdef\@asesor{#1}}
+\def\ubicacion#1{\gdef\@ubicacion{#1}}
+\def\fecha#1{\gdef\@fechapresentacion{#1}}
+\def\grado#1{\gdef\@grado{#1}}
+\def\subgrado#1{\gdef\@subgrado{#1}}
+\def\abrgrado#1{\gdef\@abrgrado{#1}}
+\def\msc{\grado{maestro en}\abrgrado{M.Sc.}}
+\def\@universidad{}
+\def\@facultad{}
+\def\@escudo{}
+\def\ancho@escudo{}
+\def\alto@escudo{}
+\def\@tesispara{}
+\def\@grado{}
+\def\@subgrado{}
+\def\@por{}
+\def\@author{}
+\def\@asesor{}
+\def\@ubicacion{Lima--Perú}
+\def\@fecha{\number\the\year}
+\def\orcid#1{\kern .08em\href{https://orcid.org/#1}{\includegraphics[keepaspectratio,width=0.7em]{ORCIDiD_icon24x24.png} \hspace{2mm}#1}}  
+
+\def\portada{
+	\thispagestyle{empty}
+	\begin{center}
+		\hyphenpenalty=10000{\vskip12pt\Large{\expandafter{\MakeUppercase\@universidad}}
+			\vskip6pt
+			\expandafter{\MakeUppercase\@facultad}}
+		\vskip12pt 
+		\includegraphics[width=5.2cm]{\@escudo}	
+		\vskip12pt
+		\hyphenpenalty=10000\large\uppercase{tesis}   
+		\vskip6pt
+		\hyphenpenalty=10000{\bf\large ``\expandafter{\MakeUppercase\@title}''}
+		\vskip6pt        
+		\large\expandafter{\MakeUppercase\@tesispara}
+		\large{\MakeUppercase\@grado\\}
+		\large\expandafter{\MakeUppercase\@subgrado}
+		\vskip6pt
+		\large\expandafter{\MakeUppercase\@por}\\
+		\vskip6pt
+		{ \bf\Large \expandafter{\MakeUppercase\@author}}\\
+		\vskip12pt    		
+		\large{\expandafter{\MakeUppercase{Asesora}:}}\\
+		\vskip6pt
+		\large{\expandafter{DRA. \MakeUppercase\@asesor}}\\
+		\vskip12pt     		
+		\large\uppercase\expandafter{\@ubicacion}\\
+		\vskip\baselineskip        
+		\large\uppercase\expandafter{\@fecha}
+	\end{center}
+	\newpage
+}  
+
+\def\nonumchapter#1{%
+	\chapter*{#1}
+	\thispagestyle{plain}
+	%   \addcontentsline{toc}{chapter}{\textit{#1}}}
+\addcontentsline{toc}{chapter}{{#1}}}
+\def\secciondelprefacio#1{%
+\chapter*{#1}
+\thispagestyle{plain}
+% \addcontentsline{toc}{chapter}{\textit{#1}}}
+\addcontentsline{toc}{chapter}{{#1}}}
+
+\def\comocitar{ \thispagestyle{fancy}%
+\begin{center}
+\begin{tabular}{cp{11.0cm}}
+	\toprule
+	Citar/How to cite & \multicolumn{1}{l}{Roca Galindo [1]}\\
+	\cmidrule(lr){1-1}
+	Referencia/Reference    & \multirow{ 2}{11cm}{\hangindent=2em \makebox[2em][l]{[1]} L. Roca Galindo, ``\textit{Modelación matemática y simulación numérica de
+			la dinámica del crecimiento de un tumor avascular 
+			con el método de elementos finitos y  
+			conjuntos de nivel}'' [Tesis de posgrado]. Lima (Perú): Universidad Nacional de Ingeniería, 2023.}\\
+	& \\
+	Estilo/Style : & \\
+	IEEE & \\
+	\bottomrule
+\end{tabular}
+\end{center}
+\begin{center}
+\begin{tabular}{cp{11cm}}
+	\toprule
+	Citar/How to cite & (Roca, 2023)\\
+	\cmidrule(lr){1-1}
+	Referencia/Reference    & \multirow{ 2}{11cm}{\hangindent=1.27cm Roca, L. (2023), \textit{Modelación matemática y simulación numérica de
+			la dinámica del crecimiento de un tumor avascular 
+			con el método de elementos finitos y  
+			conjuntos de nivel} [Tesis de posgrado, Universidad Nacional de Ingeniería]. Repositorio Institucional UNI.}\\
+	& \\
+	Estilo/Style : & \\
+	APA (7ma ed.) & \\
+	\bottomrule
+\end{tabular}
+\end{center}
+\newpage
+}
+
+\def\dedicatoria#1{ \thispagestyle{fancy}%
+\begin{flushright}\em\null\vskip6.5cm
+{\bf\itshape Dedicatoria}\\
+\vskip6pt      #1\vfill
+\end{flushright}
+\newpage
+}
+\def\agradecimientos#1{ \thispagestyle{fancy}%
+\begin{flushleft}\em\null\vskip6.5cm
+{\bf Agradecimientos}\\
+\vskip6pt      #1\vfill
+\end{flushleft}
+\newpage
+}
+\renewcommand{\chaptername}{Capítulo}
+\renewcommand{\thechapter}{\Roman{chapter}}
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}.}
+\renewcommand{\thesubsection}{\thesection\arabic{subsection}.}
+\renewcommand{\thesubsubsection}{\thesubsection\arabic{subsubsection}.}
+
+%\renewcommand{\thefigure}{\thechapter\arabic{figure}}
+%\@addtoreset {figure}{chapter}
+
+%\renewcommand{\thefigure}{\Roman{figure}}
+%\@addtoreset {figure}{chapter}
+
+
+%\renewcommand{\thetable}{\tablename \thechapter.\arabic{table}}
+
+%\renewcommand{\thetable}{ \thechapter\arabic{table}}
+
+%\renewcommand{\thetable}{\Roman{table}}
+%\@addtoreset {table}{chapter}
+\renewcommand{\contentsname}{\MakeUppercase{Índice de Contenidos}}
+
+%%% ToC (table of contents) APPEARANCE
+\usepackage[nottoc,notlot,notlof]{tocbibind} % Put the bibliography in the ToC
+\usepackage[titles,subfigure]{tocloft} % Alter the style of the Table of Contents
+%\renewcommand{\cftsecfont}{\rmfamily\mdseries\upshape}
+%\renewcommand{\cftsecpagefont}{\rmfamily\mdseries\upshape} % No bold!
+%\renewcommand{\cftchapfont}{\normalfont\sffamily}   
+%\renewcommand{\cftchappagefont}{\normalfont\sffamily} % No bold!
+\renewcommand{\cftchapfont}{\normalfont\rmfamily}   
+\renewcommand{\cftchappagefont}{\normalfont\rmfamily} % No bold!
+\renewcommand{\cftchapdotsep}{\cftdotsep}
+\setlength{\cftchapnumwidth}{6em}
+%\setlength{\cftsecnumwidth}{10em}
+%\setlength{\cftsubsecnumwidth}{10em}
+%\newlength\mylen
+%\settowidth\mylen{CAPÍTULO .}
+%\addtolength\mylen{5pt}
+%\addtolength{\cftchapnumwidth}{\mylen}
+\cftsetindents{chapter}{0em}{0em}
+\renewcommand{\cftchappresnum}{\bfseries{CAPÍTULO}\  }
+%\renewcommand{\cftchapaftersnum}{\newline}
+\renewcommand{\cftchapaftersnumb}{\newline}
+\renewcommand{\cftfigaftersnum}{:}
+\renewcommand{\cfttabaftersnum}{:}
+\renewcommand{\cftfigpresnum}{FIGURA\  }
+\setlength{\cftfignumwidth}{6em}
+\renewcommand{\cfttabpresnum}{TABLA\  }
+\setlength{\cfttabnumwidth}{6em}
+
+%\setlength{\cftsubsecnumwidth}{2em}
+\cftsetindents{section}{1cm}{2em}
+\cftsetindents{subsection}{2cm}{3em}
+\addtocontents{toc}{\protect\mbox{}\hfill{\normalfont Página}\par}
+\addtocontents{lof}{\protect\mbox{}\hfill{\normalfont Página}\par}
+\addtocontents{lot}{\protect\mbox{}\hfill{\normalfont Página}\par}
+%\renewcommand\cftchapaftersnumb{.} 
+\setlength{\cftsecnumwidth}{2em}
+%\renewcommand\cftsecaftersnumb{.} 
+
+\renewcommand{\abstractname}{Resumen}
+%\renewcommand{\bibname}{Referencias Bibliográficas}
+\renewcommand{\bibname}{Bibliografía}
+\renewcommand{\tablename}{Tabla}
+\renewcommand{\figurename}{Figura}
+\renewcommand{\appendixname}{Anexo}
+\renewcommand{\indexname}{Índice}
+\renewcommand{\listfigurename}{\MakeUppercase{Índice de Ilustraciones}}
+\renewcommand{\listtablename}{\MakeUppercase{Índice de Tablas}}
+\renewcommand{\partname}{Parte}
+\makeatother
+
+%\usepackage{letltxmacro}
+%\LetLtxMacro{\oldalgorithmic}{\algorithm}
+%\LetLtxMacro{\endoldalgorithmic}{\endalgorithm}
+%\renewenvironment{algorithm}[1][0]{%
+%  \hrulefill\par
+%  \oldalgorithmic[#1]}
+%  {\endoldalgorithmic\par
+%  \vspace*{-.5\baselineskip}
+%  \hrulefill\par
+% }
+
+%\setlength{\parskip}{\baselineskip}% modificamos espaciado entre parrafos
+%\setlength{\parindent}{5em}
+%%% The "real" document content comes below...
+\universidad{Universidad Nacional de Ingeniería}
+\facultad{Facultad de Ciencias}
+\escudo{logouni}{}{}
+\title{Modelación matemática y simulación numérica de la dinámica del crecimiento de un tumor avascular (DCTA) con el método de elementos finitos y  conjuntos de nivel}
+\hyphenation{cre-ci-mi-en-to}
+\tesispara{Para obtener el grado académico de}
+\msc \subgrado{Ciencias con Mención en Matemática Aplicada}
+\por{Elaborada por}
+\author{Luis Rodolfo Roca Galindo}
+\orcidauthor{0000-0002-3081-1328}		
+\asesor{Irla Doraliza Mantilla Núñez}
+\orcidasesor{0000-0001-9392-404X}		
+\ubicacion{Lima--Perú}
+\fecha{2023}
+\begin{document}
+\pretolerance=2000
+\tolerance=3000
+\setlength{\parindent}{1.27cm}
+\setlength{\parskip}{\baselineskip}
+%\setlength{\parskip}{0pt}
+\renewcommand{\arraystretch}{1.5}
+%%%%%%%%%%%% CUERPO PRELIMINAR %%%%%%%%%%%%%%%%%%%%%%
+\pagenumbering{roman}
+\portada
+%\comocitar
+\doublespacing
+\dedicatoria{En memoria de mis padres Rodolfo Roca Guillén e Isabel Galindo Nova.}
+%\include{tex/agradecimientos}
+\agradecimientos{\normalfont
+\begin{itemize}
+	\item Agradezco el apoyo de mi familia, en especial de mi esposa e hijos al brindarme el tiempo necesario para lograr resultados satisfactorios.
+	\item Agradezco de igual manera a mi asesora  la doctora Irla Mantilla N. por sus consejos y atención en la conducción de esta tesis.
+\end{itemize}
+}
+%\doublespace
+\tableofcontents
+
+\addtocontents{toc}{\protect\thispagestyle{fancy}}
+\listoftables
+\addtocontents{lot}{\protect\thispagestyle{fancy}}
+\listoffigures
+\addtocontents{lof}{\protect\thispagestyle{fancy}}
+%%%%%%%%%%%% TEXTO %%%%%%%%%%%%%%%%%%%%%%
+\include{tex/resumen}
+\newpage
+\pagenumbering{arabic}
+\include{tex/introduccion}
+
+\include{tex/cap1}
+\include{tex/cap2}
+\include{tex/cap3}
+\include{tex/cap4}
+\include{tex/conclusiones}
+%\include{tex/recomendaciones}
+%\bibliographystyle{IEEEtranN}
+%\bibliography{levelset}
+\include{tex/bibliografia}
+
+%\printbibliography[title={Referencias},heading=bibintoc]
+
+%\printbibliography
+%\appendix
+
+%\include{tex/anexo}
+
+\end{document}
