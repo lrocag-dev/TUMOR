@@ -374,3 +374,37 @@ $8$ & $0.0004$ & $0.0032$ & $0.0109$ & $0.0059$ & $0.0071$\\
 \end{tabular}
 \end{center}
 (``esperado'' usa la linealización de la sección anterior, $g_m=[(m^2-1)/R^2-AGR/2]\,r_m$.) La curvatura $\kappa_h$ captura solo el $58\%$ de la variación de curvatura del modo $m=4$ y el $30\%$ del $m=8$, y contiene contenido espurio en $m=2$ ($0.0085$ frente a $0.0026$). Por eso el dato $g$ no cancela el término $AGR\,r_m/2$ como debería y aparece un $\partial_nP$ espurio ($|g_4|=0.0115$ frente a $0.0031$ esperado, es decir $3.7$ veces mayor). Hay una incoherencia sin explicar: con $\kappa=1/r$ (que no contiene ninguna curvatura de la perturbación y empeora $|g_4|$ a $\approx0.023$) la asimetría final era igual ($0.034$); por tanto el dato $g$ explica la mitad de la asimetría pero la relación entre error del dato y asimetría no es simple.
+
+\subsection{Reinicialización de $\phi$ y efecto sobre $\kappa_h$}
+
+Se probó una reinicialización \emph{geométrica} (no el método elíptico del Capítulo 3): $\Gamma_h=\{\phi_h=0\}$ se muestrea con 360 rayos desde el origen (válido solo para fronteras estrelladas) y $\phi_h$ se reemplaza por la distancia con signo a esa poligonal, evaluada en los nodos de $\mathbb{P}_2$. Así se separa el efecto de que $|\nabla\phi|=1$ del error propio de un método de reinicialización. Implementada en \texttt{edp/crecimientotumoranocircularReinit.edp} (variable \texttt{rein}).
+
+\paragraph{Resultados} (experimento $r_0=1$, $n=60$, $\Delta t=0.002$; exacto $R(0.3)=2.2419$):
+\begin{center}
+\begin{tabular}{c|cc|cc|cc}
+\toprule
+ & \multicolumn{2}{c|}{Sin reinicializar} & \multicolumn{2}{c|}{Cada paso} & \multicolumn{2}{c}{Cada 10 pasos}\\
+$t$ & $r_{\rm media}$ & asim. & $r_{\rm media}$ & asim. & $r_{\rm media}$ & asim.\\
+\midrule
+$0.05$ & $1.2060$ & $0.0040$ & $1.2037$ & $0.0054$ & $1.2053$ & $0.0036$\\
+$0.10$ & $1.4240$ & $0.0063$ & $1.4210$ & $0.0086$ & $1.4245$ & $0.0062$\\
+$0.20$ & $1.8527$ & $0.0192$ & $1.8569$ & $0.0145$ & $1.8626$ & $0.0093$\\
+$0.30$ & $2.2260$ & $0.0372$ & $2.2419$ & $0.0166$ & $2.2490$ & $0.0109$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Reinicializar cada $10$ pasos reduce la asimetría en $t=0.3$ de $0.0372$ a $0.0109$ (mejor que la malla $n=100$ sin reinicializar, $0.0160$); cada paso la deja en $0.0166$, con peor resultado a tiempos cortos. El radio medio queda en $2.2490$ ($+0.3\%$) cada $10$ pasos y en $2.2419$ cada paso.
+
+\paragraph{Efecto sobre $\kappa_h$ y la velocidad} ($t=0.124$; amplitudes de Fourier sobre $\Gamma_h$ como en la sección anterior):
+\begin{center}
+\begin{tabular}{lccccc}
+\toprule
+ & $|\kappa_4|$ & $|\kappa_8|$ & $|g_4|$ & $|g_8|$ & $\partial_nP$ rango\\
+\midrule
+Sin reinicializar & $0.0116$ & $0.0032$ & $0.0115$ & $0.0059$ & $[-0.12,0.18]$\\
+Cada paso & $0.0125$ & $0.0595$ & $0.0189$ & $0.0525$ & $[-0.26,0.076]$\\
+Cada 10 pasos & $0.0041$ & $0.0221$ & $0.0134$ & $0.0188$ & $[-0.067,0.053]$\\
+\bottomrule
+\end{tabular}
+\end{center}
+La reinicialización \emph{no mejora} la representación de la curvatura en $\Gamma_h$: con reinicialización a cada paso $\kappa_h$ contiene mucho más contenido de alta frecuencia ($|\kappa_8|=0.0595$ frente a $(m^2-1)|r_8|/R^2=0.0255$ esperado, y $|\kappa_6|=0.0326$ frente a $0.0076$), probablemente por el ruido de la poligonal muestreada (la curvatura de la distancia a una poligonal es muy sensible en los vértices); cada $10$ pasos el ruido es menor pero $\kappa_4$ queda en $0.0041$ frente a $0.0082$ esperado. Por tanto la hipótesis inicial (que la pérdida de $|\nabla\phi|=1$ degrada $\kappa_h$) no se confirma. Sí mejora la velocidad: con reinicialización cada $10$ pasos, $\partial_nU$ tiene media $0.5993$ (exacto $0.5990$; sin reinicializar $0.5956$), la dispersión de $\partial_nP$ se reduce a casi la mitad y $v_D$ tiene media $4.429$ (exacto $4.422$; sin reinicializar $4.360$). La mejora parece venir de que con $|\nabla\phi_h|\approx1$ el $\phi$-FEM está mejor condicionado (las Premisas~1--2 piden $|\nabla\phi|\ge m$), no de una curvatura más exacta. Limitaciones: la reinicialización geométrica solo vale para fronteras estrelladas y no se probó en B1; con una sola malla ($n=60$) y un solo caso no se puede separar con certeza esta causa de otras.
