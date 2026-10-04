@@ -1,0 +1,547 @@
+// metodo phifem dual
+// programa final
+load "UMFPACK64"
+load "Element_P3";
+load "Element_P4";
+include "ffmatlib.idp"
+
+///// 06 de junio de 2023
+///////////////////////////////////////////
+// resuelve con elementos P2
+///////////////////////////////////////////
+verbosity = 0;
+// Curvatura por diferencias centrales de 2.o orden (malla cuadrada, paso = lado de la malla):
+// kappa = (phi_xx phi_y^2 - 2 phi_x phi_y phi_xy + phi_yy phi_x^2)/|grad phi|^3
+int usekfd=1;  // 1: diferencias centrales, 0: aproximacion debil original
+macro kfdexpr(d) ( ( (phih(x+d,y)-2.*phih(x,y)+phih(x-d,y))/(d*d) * ((phih(x,y+d)-phih(x,y-d))/(2.*d))^2 - 2.*((phih(x+d,y)-phih(x-d,y))/(2.*d))*((phih(x,y+d)-phih(x,y-d))/(2.*d))*((phih(x+d,y+d)-phih(x+d,y-d)-phih(x-d,y+d)+phih(x-d,y-d))/(4.*d*d)) + (phih(x,y+d)-2.*phih(x,y)+phih(x,y-d))/(d*d) * ((phih(x+d,y)-phih(x-d,y))/(2.*d))^2 ) / (((phih(x+d,y)-phih(x-d,y))/(2.*d))^2+((phih(x,y+d)-phih(x,y-d))/(2.*d))^2+1e-12)^1.5 ) //EOM
+
+int MALLADIAGONAL=0;
+int MALLACRUZ=1;
+int tipomalla = MALLADIAGONAL;
+int i=0;
+int m,n;
+int bandwidth=8;
+
+int maxit = 101;
+
+real step = 0.005;
+int gradPol;
+
+macro gradPol1()
+gradPol=1;
+func funckappa=P1;
+func funcPhih=P1;
+func funcVh=P1;
+func funcSh=P1;
+
+//EOM
+macro gradPol2()
+gradPol=2;
+func funckappa=P2;
+func funcPhih=P2;
+func funcVh=P2;
+func funcQ1h=P2;
+func funcQ2h=P1;
+func funcSh=P1;
+func funcZh=P2;
+//EOM
+macro gradPol3()
+  gradPol=1;
+func funckappa=P1;
+func funcPhih=P4;
+func funcVh=P3;
+func funcSh=P3;
+
+//EOM
+gradPol2;
+////////////////////////////////////////////////////////
+/////// parametros de la ecuaciones de campo   ////////
+////////////////////////////////////////////////////////
+real beta;
+real A, G;  
+////////////////////////////////////////////////////////
+real iso= 0.0 ;
+real[int] viso=[iso];
+real[int] R0=[
+  2.0000  , 2.0392  , 2.0777  , 2.1155 ,  2.1525 ,  2.1887 ,  2.2242 ,  2.2589 ,
+  2.2927  , 2.3258  , 2.3580 ,  2.3894 ,  2.4200 ,  2.4498  , 2.4788  , 2.5070 ,
+  2.5344  , 2.5611 ,  2.5869  , 2.6120  , 2.6364,   2.6600 ,  2.6829 ,  2.7051 ,
+  2.7266  , 2.7475];
+real eps1 = 1.e-6;
+
+///////////////////////////////////////////////////////
+//////////////////// frontera inicial /////////////////
+///////////////////////////////////////////////////////
+real R=0.47;
+    //return R*sqrt(sqrt( 2/(5+3*sin(7*t+7*pi/36)) ));
+
+    
+macro experimentoE()
+A=0.5;  G=20.0;  
+maxit = 26;
+step = 0.01;
+n=100;
+tipomalla = MALLADIAGONAL;
+string caso="casoE";
+func real rt(real t){       
+            return (2.0);
+}   
+//EOM    
+macro experimentoD()
+A=0.5;  G=20.0;  
+maxit = 1001;
+step = 0.001;
+string caso="casoD";
+func real rt(real t){       
+            return (4.0);
+}   
+//EOM 
+macro experimentoA()
+A=0.5;  G=20.0;  
+maxit = 1001;
+step = 0.001;
+string caso="casoA";
+func real rt(real t){       
+            return (2.1 + 0.5*cos(2*t));
+}
+//EOM
+macro experimentoB1()
+A=0.5;  G=20.0; 
+maxit = 4001;
+step = 0.00025; 
+string caso="casoB1";
+func real rt(real t){
+            return (2 + 0.24*cos(2*t) + 0.2*sin(2*t) + 0.12*cos(3*t)
+                       + 0.1*sin(3*t)+0.08*cos(5*t)+ 0.14*sin(6*t));
+       
+}
+//EOM
+macro experimentoB()
+A=0.8;  G=-5.0; 
+maxit = 1001;
+step = 0.001; 
+string caso="casoB";
+func real rt(real t){
+            return (2 + 0.24*cos(2*t) + 0.2*sin(2*t) + 0.12*cos(3*t)
+                       + 0.1*sin(3*t)+0.08*cos(5*t)+ 0.14*sin(6*t));
+       
+}
+//EOM
+
+macro experimentoC()
+A=0.2;  G=-5.0; 
+maxit = 1001;
+step = 0.001;  
+string caso="casoC";
+func real rt(real t){
+         return (2 + 0.24*cos(2*t) + 0.2*sin(2*t) + 0.12*cos(3*t)
+                        + 0.1*sin(3*t));              
+}
+//EOM
+macro experimentoC1()
+A=0.8;  G=-5.0; 
+step = 0.001;  
+maxit = 2001;
+string caso="casoC1";
+func real rt(real t){
+         return (2 + 0.24*cos(2*t) + 0.2*sin(2*t) + 0.12*cos(3*t)
+                        + 0.1*sin(3*t));              
+}
+//EOM
+
+experimentoA
+
+func real dr(real t){
+        return (-sin(2*t));
+     //   return (0);
+}
+func real d2r(real t){
+        return (-2*cos(2*t));
+     //   return (0);
+}
+func real kpolar(real t){
+        return (2*dr(t)^2+rt(t)^2-rt(t)*d2r(t))/(dr(t)^2+rt(t)^2)^(1.5);
+}
+border circ(t=0,2*pi){ x=rt(t)*cos(t); y=rt(t)*sin(t);}
+
+/* grafico de la tesis 
+mesh Th = buildmesh(circ(20),fixeborder=true);
+
+plot(Th); exit(0);
+*/
+
+
+
+func theta=atan2(y,x);
+
+//func phi = ((square(x)+square(y))/square(rt(theta))-1);
+//func phi = (square(x)+square(y)) - square(rt(theta));
+func phi = sqrt(square(x)+square(y)) - (rt(theta));
+///////////////////////////////////////////////////////
+ofstream fres("crecimientotumoralcircular100.csv");
+ 
+
+//for(int i=0; i<7; i++)
+{
+//int n=75*(2^i);
+//int n=60;
+
+mesh ThGlob,Th, ThGam;
+
+func real Meshsize(mesh & Th)
+{
+fespace Ph(Th,P0);
+Ph h=hTriangle;
+return h[].max;
+}
+
+fespace Vphi(ThGlob,funcPhih);
+fespace Vind1Glob(ThGlob,P1); 
+fespace Vind0Glob(ThGlob,P0);
+
+//fespace Xh(ThGlob,P2); // funciones para el vector normal
+fespace Bh(ThGam,funckappa); // funcion de curvatura
+fespace BhGlob(ThGlob,funckappa);
+fespace Vh(Th,funcVh); 
+fespace VhP1(Th,P1);
+fespace VphiP1(ThGlob,P1);
+fespace VhGam(ThGam,funcVh); 
+fespace VphiGam(ThGam,funcPhih); 
+fespace Xh(Th,funcPhih); 
+fespace Qh(ThGam,funcVh); 
+fespace ShGam(ThGam,funcSh); 
+fespace Sh(ThGlob,funcSh); 
+
+Vphi phih;
+Vphi nx,ny;
+Bh kappa ;
+int[int] n2o1,n2o2,Tnb2ThGlob;
+int[int] R;
+int bandwidth = 5;
+
+
+macro Laplacian(u) (dxx(u) + dyy(u)) // EOM
+
+
+macro calculaNutrientes(phih,variable){
+Vh u,v;
+real sigma=20.0;
+fespace Vind0(Th,P0);
+Vind0 ind0 = ind0Glob; 
+solve phifem(u,v,solver=sparsesolver)
+    = int2d(Th)( (dx(phih)*u + phih*dx(u))*(dx(phih)*v + phih*dx(v)) +
+                 (dy(phih)*u + phih*dy(u))*(dy(phih)*v + phih*dy(v)) +
+                 phih^2*u*v
+                )
+    - int1d(Th)( ( (dx(phih)*u + phih*dx(u))*N.x + (dy(phih)*u + phih*dy(u))*N.y)*(phih*v) )
+    + intalledges(Th)(sigma*hTriangle*(InternalEdge)*(mean(ind0)>0)
+      * jump( (dx(phih)*u + phih*dx(u))*N.x + (dy(phih)*u + phih*dy(u))*N.y )
+      * jump( (dx(phih)*v + phih*dx(v))*N.x + (dy(phih)*v + phih*dy(v))*N.y )/nTonEdge)    
+    + int2d(Th)( phih*v )     
+    + int2d(Th,2) ( sigma*hTriangle^2*( 
+        dxx(phih)*u+2*dx(phih)*dx(u)+phih*dxx(u) + dyy(phih)*u+2*dy(phih)*dy(u)+phih*dyy(u) 
+        -phih*u    
+        )*(         
+        dxx(phih)*v+2*dx(phih)*dx(v)+phih*dxx(v) + dyy(phih)*v+2*dy(phih)*dy(v)+phih*dyy(v) 
+        -phih*v           
+        ))
+    - int2d(Th,2) ( sigma*hTriangle^2*( 
+        dxx(phih)*v+2*dx(phih)*dx(v)+phih*dxx(v) + dyy(phih)*v+2*dy(phih)*dy(v)+phih*dyy(v) 
+        -phih*v
+        ))      
+    ;
+  variable = 1 +u*phih;
+ }// EOM
+ 
+macro calculaVariable(phih,variable,f,g,beta){
+  fespace Vind0(Th,P0);
+  Vind0 ind0 = ind0Glob; 
+  real gamma=20, sigma=20.0;
+  varf varA(u,v)= int2d(Th)( (dx(u)*dx(v)+dy(u)*dy(v)) + beta*u*v ) 
+    + int2d(Th,2) ( gamma/square(hTriangle)* u*v ) 
+    + int2d(Th,2) ( sigma*square(hTriangle)*(Laplacian(u)-beta *u )*(Laplacian(v)-beta *v) )
+    - int1d(Th) ((dx(u)*N.x + dy(u)*N.y)*v )
+	  + intalledges(Th)(sigma*hTriangle*(InternalEdge)*(mean(ind0)>0)*
+      jump(dx(u)*N.x+dy(u)*N.y)*jump(dx(v)*N.x+dy(v)*N.y)/nTonEdge)
+    + int2d(Th)( f*v )
+    + int2d(Th,2)(-sigma*square(hTriangle)*f*(Laplacian(v)-beta *v) 
+                   + (gamma/square(hTriangle)*g*v) )
+    ;
+  varf varB(p,v)= -int2d(ThGam)(gamma/(hTriangle^3)*phih*p*v); 
+  varf varD(p,q)=  int2d(ThGam)(gamma/(hTriangle^4)*phih*phih*p*q)
+                  - int2d(ThGam)(gamma/(hTriangle^3)*phih*g*q) ;
+
+  matrix mA, mB, mD, M;
+  real[int] U(Vh.ndof+Qh.ndof), F(Vh.ndof+Qh.ndof);
+  
+  mA=varA(Vh,Vh);
+  mB=varB(Qh,VhGam);      
+  mB=I1*mB;    
+  mD=varD(Qh,Qh);
+  M=[[mA,mB],[mB',mD]];  
+  set(M, solver=sparsesolver);        
+  F(0:Vh.ndof-1)=varA(0,Vh);
+  F(Vh.ndof:Vh.ndof+Qh.ndof-1)=varD(0,Qh);
+  U =M^-1*F;
+  variable[]=U(0:Vh.ndof-1);  
+  }// EOM
+
+
+
+macro extenderVariable(Tnb,phih,Vh,VhGam,Qh,variable,f,gD,gN){
+  matrix IVh=interpolate(VhGam,Vh,t=true,inside=1);
+  fespace Vind0(Tnb,P0);
+  Vind0 ind0 = ind0Glob; 
+  real gamma=20,sigma=20;
+  varf varA(u,v)= int2d(Tnb)(  
+    ( (dx(phih)^2*dx(u) + dx(phih)*dy(phih)*dy(u))*dx(v) 
+    + (dx(phih)*dy(phih)*dx(u) + dy(phih)^2*dy(u) )*dy(v)  )  ) 
+    + int2d(Tnb,2) ( gamma/square(hTriangle)* u*v ) 
+    + intalledges(Tnb)(sigma*hTriangle*(InternalEdge)*(mean(ind0)>0)*
+      jump(dx(u)*N.x+dy(u)*N.y)*jump(dx(v)*N.x+dy(v)*N.y)/nTonEdge)
+    + int1d(Tnb) ((gN)*v )	 
+    + int2d(Tnb)( f*v )
+    + int2d(Tnb,2)( (gamma/square(hTriangle)*gD*v) )  ;
+  varf varB(p,v)= -int2d(ThGam)(gamma/(hTriangle^3)*phih*p*v); 
+  varf varD(p,q)=  int2d(ThGam)(gamma/(hTriangle^4)*phih*phih*p*q)
+                  - int2d(ThGam)(gamma/(hTriangle^3)*phih*gD*q) ;
+
+  matrix mA, mB, mD, M;
+  real[int] U(Vh.ndof+Qh.ndof), F(Vh.ndof+Qh.ndof);
+  
+  mA=varA(Vh,Vh);
+  mB=varB(Qh,VhGam);      
+  mB=IVh*mB;    
+  mD=varD(Qh,Qh);
+  M=[[mA,mB],[mB',mD]];
+  set(M, solver=sparsesolver);  
+  F(0:Vh.ndof-1)=varA(0,Vh);
+  F(Vh.ndof:Vh.ndof+Qh.ndof-1)=varD(0,Qh);
+  U =M^-1*F;
+  variable[]=U(0:Vh.ndof-1);     
+}// EOM
+
+
+macro curvaturaP2(phih,Bh,BhGlob,ThGam,kappa,Gam2Glob){
+                     
+int[int] Curv2Glob;
+int[int] R1 = restrict(Bh, BhGlob, Gam2Glob);
+
+VindGam ind2=1;
+Vind1Glob ind0=0;
+ind0[](RGam1)=ind2[];
+mesh ThCurv = trunc(ThGlob,(ind0>0),split=1,new2old = Curv2Glob);
+mesh ThCurvP1 = trunc(ThCurv,1,split=2);
+
+fespace BhGam1(ThCurvP1,P1);
+fespace BhGam2(ThCurv,P2);
+int[int] R2 = restrict(BhGam2, BhGlob, Curv2Glob);
+BhGam2 kappaP2 = 0;
+mesh Tw;
+BhGam1 kappaP1,N0nb = 0;
+matrix IP1P2 = interpolate(BhGam2, BhGam1,t=true);
+matrix IP2P1 = interpolate(BhGam1, BhGam2,t=true);
+for (int i = 0; i < kappaP1.n; i++){
+    N0nb[][i] = 1; 
+    Tw = trunc(ThCurvP1, abs(N0nb)>0, split=1, label=2);            
+    kappaP1[][i]= -int2d(Tw)( ( dx(phih)*dx(N0nb) + dy(phih)*dy(N0nb) )
+         /( sqrt(eps1^2 + (dx(phih))^2 + (dy(phih))^2 ) ) )
+         /  int2d(Tw)( N0nb );    
+    N0nb[][i] = 0; 
+}
+
+kappaP2[] = IP2P1*kappaP1[]; 
+BhGlob kappaGlob;
+kappaGlob[](R2) = kappaP2[];
+kappa = 0;
+kappa[] = kappaGlob[](R1);
+} // EOM
+macro curvaturaP1(phih,Bh,BhGlob,ThGam,kappa,Gam2Glob){
+
+int[int] Curv2Glob;
+int[int] R1 = restrict(Bh, BhGlob, Gam2Glob);
+
+VindGam ind2=1;
+
+Vind1Glob ind0=0;
+ind0[](RGam1)=ind2[];
+
+mesh ThCurvP1 = trunc(ThGlob,(ind0>0),split=1,new2old = Curv2Glob);
+
+fespace BhGam1(ThCurvP1,P1);
+int[int] R2 = restrict(BhGam1, BhGlob, Curv2Glob);
+mesh Tw;
+ BhGam1 kappaP1,N0nb = 0; 
+ for (int i = 0; i < kappaP1.n; i++){
+    N0nb[][i] = 1; 
+    Tw = trunc(ThCurvP1, N0nb>0, split=1, label=2);        
+    kappaP1[][i]= -int2d(Tw)( ( dx(phih)*dx(N0nb) + dy(phih)*dy(N0nb) )
+         /( sqrt(eps1^2 + (dx(phih))^2 + (dy(phih))^2 ) ) )
+         /  int2d(Tw)( N0nb );
+        
+    N0nb[][i] = 0;     
+    }
+BhGlob kappaGlob;
+
+kappaGlob[](R2) = kappaP1[];
+kappa = 0;
+kappa[] = kappaGlob[](R1);
+
+} // EOM
+
+
+Vind1Glob ind1Glob;
+Vind0Glob ind0Glob;
+int[int] Gam2Glob;
+int[int] Th2Glob;
+fespace VindGam(ThGam,P1);
+int[int] RGam1,RGlob ;
+
+////////////////////////// inicio de las iteraciones /////////////////////////////
+ThGlob=square(n,n,[8*x-4,8*y-4],flags=tipomalla);// 2 diagonales de izq a der
+real meshsiz=Meshsize(ThGlob); //maximal size of a mesh triangle
+cout<<"maximal size of a mesh triangle h="<<meshsiz<<endl;
+// cargar la frontera inicial
+
+//string rutaphih="./"+caso+"/phih1000.txt";
+//ifstream fres(rutaphih);
+//int t0=1;
+//for(int k=0;k<Vphi.ndof;k++) fres>>phih[][k];
+//for(int k=0;k<phih.n;k++) fres>>phih[][k];
+phih = phi;
+//plot(phih,wait=1);
+//exit(0);
+
+int it;
+real instante ;
+/* grafico tesis 
+n=20;
+ThGlob=square(n,n,[12*x-6,12*y-6],flags=tipomalla);
+viso=[0];phih=phih;
+plot(phih,circ(100),viso=viso);exit(0);
+*/
+//plot(ThGlob,circ(100),wait=1);exit(0);
+savemesh(ThGlob,caso+"/ThGlob.msh");
+ffSaveVh(ThGlob,Vphi,caso+"/Vphi.txt");
+real tiempoarchivo=0.01;
+int contadorarchivo=tiempoarchivo/step;
+//cout<<contadorarchivo; exit(0);
+int contador=contadorarchivo;
+//maxit=2001;
+//int it0 = 1000;
+int it0 = 0;
+for (it=it0; it<maxit; it++) {  
+  //Vphi phiex = sqrt(x^2  +y^2)-R0[it0];
+  //mesh ThBanda = trunc(ThGlob,abs(phiex)<0.5);
+  //Vphi dphih=phiex-phih;
+  //plot(dphih,wait=1);exit(0);
+  //fres<<it<<";"<<meshsiz<<";"
+  //<<sqrt(int2d(ThBanda)((phiex-phih)^2))/sqrt(int2d(ThBanda)((phiex)^2))
+  //<<endl;
+  instante=it*step;
+  //cout<<"Iteracion "<<it+1<<"  t = "<<instante<<endl;
+  ////////////////////////////////////////////////////// 
+  //     Definicion de regiones y fronteras
+  //////////////////////////////////////////////////////  
+
+  ind1Glob=(phih<1e-10); //1 inside Omega1, 0 outside
+  ind0Glob=(ind1Glob<0.9)&&(ind1Glob>0.1); 
+  
+  ThGam = trunc(ThGlob,ind0Glob==1,split=1,new2old = Gam2Glob);
+  ThGam = change(ThGam,flabel = (( phih(x,y) < 0 ) ? 1 : 2 )); // borde interior : 1, borde exterior : 2
+  ThGlob = change(ThGlob,fregion = 1+ind0Glob );
+  
+  RGam1 = restrict(VindGam, Vind1Glob,Gam2Glob);
+   
+  Th = trunc(ThGlob,ind1Glob>0,split=1,new2old = Th2Glob);  
+  Th = change(Th,fregion= 1+ (ind0Glob==1) );
+
+  RGlob = restrict(VhP1, VphiP1, Th2Glob);
+
+  matrix I1=interpolate(VhGam,Vh,t=true,inside=1);
+  Vh presion, nutrientes;
+  VhGam nD = 1;
+  Vh fn = 0;
+  beta = 1.;  
+  ShGam vN, vP, vD;
+ 
+  Vphi nabla;
+
+  if (usekfd==1){
+    real dd = meshsiz/sqrt(2.); // lado de la malla cuadrada
+    kappa = kfdexpr(dd);
+  }
+  else if (gradPol==1){
+  curvaturaP1(phih,Bh,BhGlob,ThGam,kappa,Gam2Glob);
+  }
+  else{
+  curvaturaP2(phih,Bh,BhGlob,ThGam,kappa,Gam2Glob);
+  }
+  /*
+  real kprom = int1d(ThGam, levelset=phih) (kappa)/int1d(ThGam, levelset=phih) (1);
+  cout<<"kappa oscilacion : "<<sqrt( int1d(ThGam, levelset=phih) ((kappa-kprom)^2)
+                                   /int1d(ThGam, levelset=phih) (1))<<endl;
+  cout<<"kappa promedio : "<<kprom<<endl;
+  cout<<"kappa-1/r : "<<sqrt(int1d(ThGam, levelset=phih) ((kappa-1/sqrt(x^2+y^2))^2))<<endl;    
+  */  
+  calculaNutrientes(phih,nutrientes);  
+
+  nD = kappa-A*G*0.25*(x*x+y*y);
+  beta = 0; 
+  fn=0;
+
+  calculaVariable(phih,presion,fn,nD,beta);
+   
+  viso=[0.25];
+ 
+  Sh S1, S2;
+  
+  ShGam N1 = dx(phih)/sqrt(eps1^2 + dx(phih)^2+dy(phih)^2);
+  ShGam N2 = dy(phih)/sqrt(eps1^2 + dx(phih)^2+dy(phih)^2);
+  ShGam Vx = -dx(presion)+G*dx(nutrientes)-0.5*A*G*x;
+  ShGam Vy = -dy(presion)+G*dy(nutrientes)-0.5*A*G*y;
+  vD = N1*Vx + N2*Vy;
+  extenderVariable(ThGlob,phih,Sh,ShGam,ShGam,S1,0,N1*vD,0);
+  extenderVariable(ThGlob,phih,Sh,ShGam,ShGam,S2,0,N2*vD,0);
+  /*
+  real vDprom  =  int1d(ThGam, levelset=phih) (vD)/int1d(ThGam, levelset=phih) (1) ;
+  cout<<"V prom="<<vDprom<<endl;
+  cout<<"V osc="<< sqrt(int1d(ThGam, levelset=phih) ( (vD - vDprom)^2)/
+                        int1d(ThGam, levelset=phih) (1) ) <<endl;
+
+  cout<<int2d(ThGlob)(sqrt(dx(phih)^2+dy(phih)^2))/int2d(ThGlob)(1)<<endl;
+  */
+  VphiGam phihGam  = phih;
+ // if (1>0){
+  if (contador==contadorarchivo){
+    cout<<"Guardando para t="<<instante<<endl;
+    ffSaveData(phih,caso+"/phih"+it+".txt"); 
+    savemesh(Th,caso+"/Th"+it+".msh");
+    ffSaveVh(Th,Vh,caso+"/Vh"+it+".txt");
+    ffSaveData(nutrientes,caso+"/Vhnutrientes"+it+".txt"); 
+    ffSaveData(presion,caso+"/Vhpresion"+it+".txt"); 
+    contador=1;
+  } else {
+    contador++;
+  }
+ // }
+  Vphi phihtmp;   
+  phihtmp= convect([S1,S2],-step,phih);  
+  phih = phihtmp;    
+  //plot(phih,viso=viso,wait=0);exit(0);
+}
+/*
+viso=[0.];
+ind1Glob=(phih<1e-10);
+ind0Glob=(ind1Glob<0.9)&&(ind1Glob>0.1);
+ThGam = trunc(ThGlob,ind0Glob==1,split=1,new2old = Gam2Glob);
+RGam1 = restrict(VindGam, Vind1Glob,Gam2Glob);
+VphiGam phihGam  = phih;
+*/
+//plot(ThGam,phihGam,viso=viso,wait=0,cmm="phi it="+it);  
+//plot(ThGam,vgam,[n1,n2],fill=1,value=1,wait=0,cmm="it="+it,ps="phi nc it="+it+".ps");  
+//plot(ThGam,phih,viso=viso,wait=0,cmm="phi it="+it,ps="phi nc it="+it+".ps");
+//phih = phi;
+//plot(ThGam,phih,viso=viso,wait=0,cmm="phi",ps="phi.ps");
+}
+ 

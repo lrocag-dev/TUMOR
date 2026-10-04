@@ -256,3 +256,31 @@ $0.30$ & $2.2260$ & $0.0372$ & $2.2275$ & $0.0293$ & $0.7964$ & $0.912$\\
 	\item Con $S\in\mathbb{P}_1$ la asimetría mejora durante $t\le0.2$ (p.\,ej.\ $0.0100$ frente a $0.0192$ en $t=0.2$) pero crece rápido después ($0.0293$ en $t=0.3$, solo $21\%$ menos que en $\mathbb{P}_2$) y el radio medio no mejora. En $t=0.12$ aparecen valores atípicos locales ($\partial_nU=0.527$ en $45^\circ$ frente al exacto $0.599$; $v_D$ mínimo $2.08$).
 \end{itemize}
 Por tanto, con los parámetros actuales, pasar a $\mathbb{P}_3$ no resuelve la pérdida de simetría: el error pasa de una dispersión suave dependiente de la malla a valores atípicos puntuales. Es probable que $\gamma$ y $\sigma$ (elegidos para $\mathbb{P}_2$) deban aumentarse con el grado, pero eso no se ha probado.
+
+\subsection{Curvatura por diferencias centrales en malla cuadrada}
+
+Se implementó en \texttt{edp/crecimientotumoranocircularFD.edp} (variable \texttt{usekfd}) la curvatura
+\[
+\kappa=\frac{\phi_{xx}\phi_y^2-2\phi_x\phi_y\phi_{xy}+\phi_{yy}\phi_x^2}{|\nabla\phi|^3},
+\]
+con diferencias centrales de segundo orden de paso $d$ (lado de la malla cuadrada) evaluadas sobre $\phi_h$, y $\kappa_h$ interpolada en $\mathbb{P}_2$ en la banda. Se compara con la aproximación débil actual (Sección ``Aproximación de la curvatura'').
+
+\paragraph{Exactitud estática} (error de $\kappa_h$ evaluada sobre la curva exacta, 360 puntos; sin errores relativos porque $\kappa$ se anula en puntos de inflexión):
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+Caso & $n$ & Débil: error medio / máx. & Dif. centrales: error medio / máx.\\
+\midrule
+Círculo $R=2$ & $60$ & $1.5\times10^{-4}$ / $4.3\times10^{-4}$ & $3.1\times10^{-4}$ / $5.5\times10^{-4}$\\
+Círculo $R=2$ & $100$ & $5.3\times10^{-5}$ / $1.6\times10^{-4}$ & $1.1\times10^{-4}$ / $2.0\times10^{-4}$\\
+B1 & $60$ & $0.0146$ / $0.347$ & $0.0314$ / $0.344$\\
+B1 & $100$ & $0.0045$ / $0.090$ & $0.0109$ / $0.100$\\
+B1 & $150$ & $0.0021$ / $0.038$ & $0.0049$ / $0.044$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Con paso $2d$ el error de B1 empeora ($0.109$, $0.042$, $0.019$ para $n=60,100,150$). En B1 la curvatura exacta varía entre $-2.9$ y $1.9$. Ambos métodos convergen aproximadamente con orden $h^2$, y las diferencias centrales tienen un error medio unas $2$ veces mayor que la aproximación débil con el mismo $h$. Con paso $d=h$ no son más exactas que el método actual.
+
+\paragraph{Experimento $r_0=1$} ($n=60$, $\Delta t=0.002$, $t=0.3$): asimetría $0.030$ con diferencias centrales de paso $h$ ($0.034$ con paso $2h$), frente a $0.037$ con la aproximación débil y $0.034$ con la curvatura exacta $1/r$. La diferencia entre métodos de curvatura está dentro de lo que cambia al usar la curvatura exacta, por lo que la curvatura no explica la pérdida de simetría (ver la sección anterior).
+
+\paragraph{Robustez en la banda.} Durante la evolución del círculo, $\max|\kappa_h-1/r|$ sobre todos los nodos de la banda fue $0.94$ con la aproximación débil en $t=0.3$ (con valores de $\kappa_h$ entre $-0.50$ y $1.03$, en nodos del borde de la banda) y $0.14$ con diferencias centrales (con valores entre $0.30$ y $0.60$). Las diferencias centrales no producen valores atípicos en el borde de la banda. En el experimento $r_0=1$ esto no cambió el resultado, pero no se probó en evoluciones largas de B1.
