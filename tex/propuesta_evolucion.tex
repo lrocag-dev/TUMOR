@@ -116,3 +116,21 @@ Resultados y limitaciones:
 	\item Para $\Delta t$ pequeño ($\le 0.005$) el método de características es más preciso; la ventaja del nuevo esquema está en los pasos grandes.
 	\item Solo se probó una geometría, una malla y tiempos cortos; no se observó explosión (\emph{blow-up}) en ninguno de los métodos, solo pérdida de precisión.
 \end{itemize}
+
+\paragraph{Mallas más finas.} Se repitió la comparación con mallas $100\times100$ ($h\approx0.113$) y $150\times150$ ($h\approx0.075$), $t=0.04$, referencia: características con $\Delta t=0.002$. Error máximo en la posición radial de la frontera:
+
+\begin{center}
+\begin{tabular}{c|ccc|ccc}
+\toprule
+ & \multicolumn{3}{c|}{$n=100$} & \multicolumn{3}{c}{$n=150$}\\
+$\Delta t$ & Caract. & SI $c_\theta=0.5$ & SI $c_\theta=1$ & Caract. & SI $c_\theta=0.5$ & SI $c_\theta=1$\\
+\midrule
+$0.004$ & $0.0009$ & $0.0084$ & $0.0105$ & $0.0007$ & $0.0087$ & $0.0114$\\
+$0.008$ & $0.0015$ & $0.0092$ & $0.0123$ & $0.0292$ & $0.0099$ & $0.0134$\\
+$0.020$ & $0.0232$ & $0.0112$ & $0.0162$ & $0.0269$ & $0.0106$ & $0.0156$\\
+$0.040$ & $0.0131$ & $0.0103$ & $0.0155$ & $0.0194$ & $0.0098$ & $0.0150$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+El método de características pierde precisión a partir de $\Delta t\approx0.02$ para $n=100$ y ya en $\Delta t=0.008$ para $n=150$ (el $\Delta t$ útil disminuye al refinar, como predice el análisis), mientras que el esquema semi-implícito mantiene un error casi constante ($\approx0.01$) hasta $\Delta t=0.04$ en todas las mallas. En $n=150$ la ventaja medida es de un factor $\ge5$ en el paso de tiempo útil (de $0.004$ a $\ge0.04$, que fue el mayor probado, de modo que es una cota inferior). No se observó \emph{blow-up} en ninguna corrida. El sesgo del esquema semi-implícito ($\approx0.01$) no disminuye al refinar la malla ni al reducir $\Delta t$; su origen no está aislado todavía, y por ahora limita la precisión alcanzable con este esquema frente al método de características con $\Delta t$ pequeño.
