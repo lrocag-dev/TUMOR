@@ -91,3 +91,28 @@ Si $\Delta t\sim h$ resultara aún insuficiente por la precisión de primer orde
 	\item Circunferencia perturbada con un modo $k$: comparar la tasa de decaimiento/crecimiento con la relación de dispersión lineal y medir el $\Delta t_{\max}$ estable frente a $h$ (esperado $\sim h^3$ con características, $\sim h$ con el nuevo esquema).
 	\item Comparar tiempo total de CPU y conservación del área/volumen frente al método de características para el mismo tiempo final.
 \end{enumerate}
+
+\subsection{Verificación en el código FreeFem++}
+
+El esquema se implementó en \texttt{edp/crecimientotumoranocircularSI.edp}, que reemplaza únicamente la llamada a \texttt{convect} del programa \texttt{crecimientotumoranocircularH.edp}. Se comparó con el método de características sobre el experimento A ($r_0(\theta)=2.1+0.5\cos 2\theta$, $A=0.5$, $G=20$), malla $60\times60$ ($h\approx0.19$), tiempo final $t=0.12$. La referencia es el método de características con $\Delta t=0.001$ y el error es la máxima diferencia de la posición radial de la frontera en 12 ángulos.
+
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$\Delta t$ & Características & Semi-implícito ($c_\theta=2$)\\
+\midrule
+$0.010$ & $0.008$ & $0.027$\\
+$0.020$ & $0.067$ & $0.025$\\
+$0.030$ & $0.345$ & $0.026$\\
+$0.040$ & $0.158$ & $0.021$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+Resultados y limitaciones:
+\begin{itemize}
+	\item El método de características pierde precisión a partir de $\Delta t\approx0.02$ y es inutilizable en $0.03$; el esquema propuesto mantiene un error casi constante hasta $\Delta t=0.04$. En esta malla y este experimento la ganancia observada es de un factor 2--4, \emph{no} los órdenes de magnitud del modelo lineal; la ganancia debe crecer al refinar la malla, pero eso no se ha medido todavía.
+	\item El esquema propuesto introduce un sesgo (error de $0.01$--$0.03$) que no disminuye con $\Delta t$ y que depende de $c_\theta$: a $t=0.05$ y $\Delta t=0.005$ el error fue $0.013, 0.010, 0.007, 0.006$ para $c_\theta=2, 1, 0.5, 0.25$. Por ello el programa usa $c_\theta=0.5$ por defecto. La cota teórica $c_\theta\ge\pi/2$ es conservadora; falta determinar experimentalmente cuán pequeño puede ser $c_\theta$ antes de perder estabilidad con mallas más finas.
+	\item Para $\Delta t$ pequeño ($\le 0.005$) el método de características es más preciso; la ventaja del nuevo esquema está en los pasos grandes.
+	\item Solo se probó una geometría, una malla y tiempos cortos; no se observó explosión (\emph{blow-up}) en ninguno de los métodos, solo pérdida de precisión.
+\end{itemize}
