@@ -169,3 +169,39 @@ $0.020$ & --- & $0.0118$ & $0.0147$ & $0.0235$ & $0.0377$\\
 \end{center}
 
 En este horizonte temporal corto \emph{no} se reproduce la inestabilidad: el método de características es estable y su error crece linealmente con $\Delta t$ (para $\Delta t=0.008$ es $0.008$), sin ninguna corrida con \emph{blow-up}, y es más preciso que el esquema semi-implícito para todo $\Delta t$ probado. El esquema propuesto no aporta ventaja en este ensayo. La inestabilidad que obliga a usar $\Delta t=0.00025$ en B1 (tiempo final $t=1$) debe aparecer a tiempos mayores, cuando la frontera desarrolla curvatura alta; no está probado todavía que el esquema propuesto la evite.
+
+\subsection{Comparación con características de Galerkin (proyección $L^2$)}
+
+El programa \texttt{edp/crecimientotumoranocircularGalerkin.edp} sustituye la interpolación nodal \texttt{phih = convect(\dots)} por la proyección $L^2$ $(\phi^{n+1},v)=(\phi^n\circ X,v)$, con $\phi_h\in\mathbb{P}_2$ y $S\in\mathbb{P}_1$.
+
+\paragraph{Experimento A ($n=100$, $t=0.04$).} Error máximo radial frente a la referencia nodal con $\Delta t=0.002$:
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$\Delta t$ & Nodal & Galerkin\\
+\midrule
+$0.002$ & --- & $0.0024$\\
+$0.004$ & $0.0009$ & $0.0033$\\
+$0.008$ & $0.0015$ & $0.0026$\\
+$0.020$ & $0.0232$ & $0.0198$\\
+$0.040$ & $0.0131$ & $0.0131$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Para $\Delta t\ge0.02$ ambos métodos pierden precisión de forma similar; para $\Delta t\le0.008$ el método nodal está más cerca de su referencia.
+
+\paragraph{Experimento B1 ($t=0.04$, $L=6$).} Dependencia de la malla (nodal, $\Delta t=0.002$): la diferencia máxima entre $n=60$ y $n=150$ es $0.20$ (entre $n=100$ y $n=150$, $0.096$); con Galerkin, $0.20$ y $0.114$. El error espacial domina sobre las diferencias entre esquemas temporales ($\approx0.01$); las comparaciones de las secciones anteriores aíslan únicamente el error temporal a malla fija.
+
+La diferencia máxima entre ambos métodos a igual $\Delta t$ es $0.012$ ($n=60$), $0.019$ ($n=100$) y $0.028$ ($n=150$) para $\Delta t=0.002$. En $n=150$ se varió $\Delta t$:
+\begin{center}
+\begin{tabular}{ccc}
+\toprule
+$\Delta t$ & $|{\rm nodal}-{\rm Galerkin}|$ & \\
+\midrule
+$0.004$ & $0.0239$ & \\
+$0.002$ & $0.0279$ & \\
+$0.001$ & $0.0230$ & \\
+\bottomrule
+\end{tabular}
+\end{center}
+y los cambios al reducir $\Delta t$ a la mitad fueron $0.0025$ y $0.0022$ (nodal) frente a $0.0148$ y $0.0148$ (Galerkin). Es decir, con esta implementación el método de Galerkin \emph{no converge} al reducir $\Delta t$ a malla fija (el resultado se desplaza $\approx0.015$ en cada reducción), mientras que el nodal sí se estabiliza. No se pudo determinar cuál de los dos se acerca más a la solución exacta del problema continuo, porque no se dispone de solución de referencia para B1. Posibles causas de la deriva del método de Galerkin, sin verificar: orden de cuadratura insuficiente para el integrando $\phi^n\circ X$ (no polinomial), y oscilaciones de la proyección $L^2$ cerca de la singularidad cónica de $\phi_0=r-r(\theta)$ en el origen, acumuladas en cada paso.
