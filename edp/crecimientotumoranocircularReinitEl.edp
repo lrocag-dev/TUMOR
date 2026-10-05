@@ -10,7 +10,7 @@ include "ffmatlib.idp"
 // resuelve con elementos P2
 ///////////////////////////////////////////
 verbosity = 0;
-int reine=10; int reine0=0; int nitr=30; real gamr=20., sigr=20.; // reinicializacion eliptica
+int reine=1; int reine0=0; int nitr=10; real gamr=2000., sigr=0.1; // reinicializacion eliptica
 real Rmaxs=3.9; // radio maximo de busqueda de la frontera para los diagnosticos
 int MALLADIAGONAL=0;
 int MALLACRUZ=1;

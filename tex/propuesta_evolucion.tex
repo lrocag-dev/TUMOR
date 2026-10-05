@@ -434,3 +434,42 @@ Elíptica cada paso, 10 iteraciones & $2.2094$ & $0.0298$ & $0.0301$\\
 Reinicializar cada $10$ pasos con el método elíptico reduce la asimetría de $0.0372$ a $0.016$ y mejora el radio medio ($2.2379$--$2.2386$, error $0.17\%$ frente a $0.71\%$ sin reinicializar), es decir, recupera alrededor del $60\%$ de la mejora de la reinicialización geométrica en asimetría. Aplicarla a cada paso empeora el resultado ($0.0301$, radio $2.2094$): cada aplicación desplaza $\Gamma_h$ ($3\times10^{-4}$ a $2\times10^{-3}$ en máximo por aplicación en este caso) y el desplazamiento se acumula. Antes de reinicializar, $\max\big||\nabla\phi|-1\big|$ en la banda ($|\phi|<0.3$) era $0.02$--$0.05$, y después $0.005$--$0.018$.
 
 \paragraph{Limitaciones.} (i) Cuando $\phi_0$ está lejos de ser una distancia, la reinicialización elíptica con estos parámetros no es fiable: aplicada a B1 en $t=0$ ($\max\big||\nabla\phi|-1\big|=0.50$ antes), con 80 iteraciones el gradiente queda en $0.066$ ($n=60$) y $0.19$ ($n=100$), $\Gamma_h$ se desplaza $0.0075$ y $0.0157$, y el error medio de $\kappa_h$ sobre la curva exacta empeora de $0.0146$ a $0.101$ ($n=60$) y de $0.0045$ a $0.148$ ($n=100$). La iteración de punto fijo converge lentamente (el cambio por iteración solo decrece a un ritmo casi lineal) y no se probó otro $\gamma$, $\sigma$ ni un método de Newton. (ii) El desplazamiento de $\Gamma_h$ en cada aplicación es una pérdida de exactitud geométrica que la versión geométrica no tiene. (iii) Un solo caso suave y una sola malla; B1 con evolución no se ha probado con reinicialización.
+
+\subsection{Barrido de $\gamma$ y $\sigma$ en la reinicialización elíptica}
+
+\paragraph{B1 en $t=0$} (frontera $\phi_0=r-r(\theta)$, con $\max\big||\nabla\phi|-1\big|=0.50$; $n=60$ y $n=100$, $80$ iteraciones). Variable de interés: desplazamiento máximo de $\Gamma_h$ (radio en 48 ángulos), $\max\big||\nabla\phi|-1\big|$ en la banda $|\phi|<0.3$ tras reinicializar y error medio de $\kappa_h$ sobre la curva exacta (sin reinicializar: $0.0146$ para $n=60$, $0.0045$ para $n=100$).
+\begin{center}
+\begin{tabular}{rr|ccc|ccc}
+\toprule
+ & & \multicolumn{3}{c|}{$n=60$} & \multicolumn{3}{c}{$n=100$}\\
+$\gamma$ & $\sigma$ & desplaz. & $\big||\nabla\phi|-1\big|$ & $\kappa$ medio & desplaz. & $\big||\nabla\phi|-1\big|$ & $\kappa$ medio\\
+\midrule
+$1$ & $20$ & $0.10$ & $0.055$ & $0.376$ & $0.110$ & $0.102$ & $0.435$\\
+$5$ & $20$ & $0.024$ & $0.061$ & $0.210$ & $0.042$ & $0.170$ & $0.287$\\
+$20$ & $20$ & $0.0075$ & $0.066$ & $0.101$ & $0.016$ & $0.194$ & $0.148$\\
+$100$ & $20$ & $0.0021$ & $0.076$ & $0.056$ & $0.0044$ & $0.209$ & $0.048$\\
+$500$ & $20$ & $8.4\times10^{-4}$ & $0.090$ & $0.039$ & $0.0011$ & $0.213$ & $0.025$\\
+$500$ & $0.1$ & $4.8\times10^{-4}$ & $0.055$ & $0.026$ & $0.0012$ & $0.190$ & $0.028$\\
+$2000$ & $0.1$ & $2.6\times10^{-4}$ & $0.055$ & $0.024$ & $4.6\times10^{-4}$ & $0.196$ & $0.022$\\
+$10^4$ & $0.1$ & $2.6\times10^{-4}$ & $0.055$ & $0.024$ & $2.1\times10^{-4}$ & $0.203$ & $0.019$\\
+\bottomrule
+\end{tabular}
+\end{center}
+(También se probaron $\sigma=0.1,1,20,100$ para $\gamma=1,5,20,100,500$; la influencia de $\sigma$ es pequeña: $\sigma\le1$ da un gradiente algo más cercano a $1$ y un $\kappa$ algo mejor que $\sigma=20,100$.) El desplazamiento de $\Gamma_h$ es proporcional a $1/\gamma$. Con $\gamma$ grande y $\sigma$ pequeño el desplazamiento baja a $\sim2\times10^{-4}$, pero en B1 en $t=0$ la reinicialización sigue sin ser inocua: con $n=100$ el gradiente queda en $0.20$ tras $80$ iteraciones ($0.087$ tras $1000$) y el error medio de $\kappa_h$ ($0.019$--$0.028$) es mayor que sin reinicializar ($0.0146$ y $0.0045$) y no mejora al refinar. No se encontró un par $(\gamma,\sigma)$ que evite esto para esta forma irregular y este punto de partida (con $\phi_0$ muy alejada de una distancia).
+
+\paragraph{Experimento $r_0=1$ con $\gamma=2000$, $\sigma=0.1$} ($n=60$, $\Delta t=0.002$; exacto $R(0.3)=2.2419$):
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Variante & $r_{\rm media}(0.3)$ & asim.\ $t=0.2$ & asim.\ $t=0.3$\\
+\midrule
+Sin reinicializar & $2.2260$ & $0.0192$ & $0.0372$\\
+Elíptica $\gamma=20,\sigma=20$, cada 10 pasos & $2.2379$ & $0.0141$ & $0.0165$\\
+Elíptica $\gamma=2000,\sigma=0.1$, cada 10 pasos (30 it.) & $2.2468$ & $0.0064$ & $0.0066$\\
+Elíptica $\gamma=2000,\sigma=0.1$, cada 5 pasos (30 it.) & $2.2437$ & $0.0055$ & $0.0054$\\
+Elíptica $\gamma=2000,\sigma=0.1$, cada paso (10 it.) & $2.2399$ & $0.0038$ & $0.0042$\\
+Velocidad exacta (referencia) & $2.2412$ & $0.0010$ & $0.0010$\\
+\bottomrule
+\end{tabular}
+\end{center}
+Con $\gamma=2000$ el desplazamiento de $\Gamma_h$ por aplicación es de $10^{-5}$ a $10^{-4}$ y reinicializar en cada paso ya no empeora el resultado sino que es lo mejor: asimetría $0.0042$ (frente a $0.0372$ sin reinicializar, $0.0160$ con la malla $n=100$ sin reinicializar y $0.0109$ con la reinicialización geométrica cada $10$ pasos) y radio medio con error $0.09\%$. El suelo de la asimetría con velocidad exacta es $0.001$. Los valores por defecto de \texttt{crecimientotumoranocircularReinitEl.edp} se fijaron en $\gamma=2000$, $\sigma=0.1$, \texttt{reine=1}, \texttt{nitr=10}. Limitación: este resultado es para un círculo, una malla ($n=60$) y un solo tiempo final; en B1 la reinicialización aumenta el error de $\kappa_h$ (arriba), de modo que no se puede asumir que sirva igual para formas irregulares.
